@@ -48,7 +48,6 @@ def ingest_tilesets(data_dir):
             filename="{}".format(filename),
             filetype=get_filetype(filename),
             datatype=get_datatype(filename)
-
         )
 
 
