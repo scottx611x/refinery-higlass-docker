@@ -8,8 +8,6 @@ import unittest
 
 class CommandlineTest(unittest.TestCase):
     def setUp(self):
-        # self.suffix = os.environ['SUFFIX']
-        # self.stamp = os.environ['STAMP']
         command = "docker port container-{STAMP}{SUFFIX} | perl -pne 's/.*://'".format(**os.environ)
         os.environ['PORT'] = subprocess.check_output(command, shell=True).strip().decode('utf-8')
         self.url = 'http://localhost:{PORT}/api/v1/tilesets/'.format(
