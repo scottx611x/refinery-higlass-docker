@@ -1,4 +1,4 @@
-FROM gehlenborglab/higlass:latest
+FROM gehlenborglab/higlass
 
 COPY on_startup.py /home/higlass/projects/higlass-server
 COPY input.json $HIGLASS_SERVER_BASE_DIR
