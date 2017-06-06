@@ -12,6 +12,7 @@ RUN ( echo ""; \
     >> supervisord.conf
 
 # We want higlass to access the default viewconf relative to our current container's url
-RUN sed -i 's/\/api\//\.\/api\//g' /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
+RUN sed -i 's/"#higlass","\/api/"#higlass","\.\/api/g' \
+/home/higlass/projects/higlass-website/assets/scripts/hg-launcher.js
 
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
