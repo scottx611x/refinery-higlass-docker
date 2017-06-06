@@ -11,4 +11,6 @@ RUN ( echo ""; \
       echo "priority = 1000"; ) \
     >> supervisord.conf
 
+RUN sed -i 's/location \/api\/v1\//location ~ \/api\/v1\//g' /etc/nginx/sites-enabled/hgserver_nginx.conf
+
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
