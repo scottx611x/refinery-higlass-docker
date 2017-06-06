@@ -11,6 +11,7 @@ RUN ( echo ""; \
       echo "priority = 1000"; ) \
     >> supervisord.conf
 
-RUN sed -i 's/location \/api\/v1\//location ~ \/api\/v1\//g' /etc/nginx/sites-enabled/hgserver_nginx.conf
+# We want higlass to access the default viewconf relative to our current container's url
+RUN sed -i 's/\/api\//\.\/api\//g' /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
 
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
