@@ -14,10 +14,17 @@ docker build --cache-from $REPO \
 # by itself, then it has gotten too complicated.
 export SUFFIX=-standalone
 echo "image-$STAMP"
-docker run --name container-$STAMP$SUFFIX \
+
+CONTAINER_NAME="container-$STAMP$SUFFIX"
+
+mkdir "/tmp/$CONTAINER_NAME"
+
+docker run --name $CONTAINER_NAME \
            --detach \
            --publish-all \
+           --volume /tmp/$CONTAINER_NAME:/refinery-data \
            image-$STAMP
 
 python tests.py
 
+rm -r "/tmp/$CONTAINER_NAME"
