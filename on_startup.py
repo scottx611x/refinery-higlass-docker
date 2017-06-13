@@ -22,10 +22,11 @@ def populate_higlass_data_directory(data_dir):
         try:
             response = requests.get(url)
         except RequestException as e:
-            logger.error(
-                "Something went wrong while fetching file from %s : %s",
-                url,
-                e
+            raise RuntimeError(
+                "Something went wrong while fetching file from {} : {}".format(
+                    url,
+                    e
+                )
             )
         else:
             with open('{}{}'.format(data_dir, url.split("/")[-1]), 'wb') as f:
@@ -58,9 +59,11 @@ def get_datatype(filename):
     }
     try:
         datatype = datatype_mapping[filename.split(".")[-1]]
-    except KeyError:
-        logger.error(
-            "Could not determine datatype from filename: %s", filename
+    except KeyError as e:
+        raise RuntimeError(
+            "Could not determine datatype from filename: {}".format(
+                filename
+            )
         )
     else:
         return datatype
@@ -74,14 +77,16 @@ def get_filetype(filename):
     try:
         filetype = filetype_mapping[filename.split(".")[-1]]
     except KeyError:
-        logger.error(
-            "Could not determine filetype from filename: %s", filename
+        raise RuntimeError(
+            "Could not determine filetype from filename: {}".format(
+                filename
+            )
         )
     else:
         return filetype
 
 if __name__ == '__main__':
-    data_dir = "/tmp/"
+    data_dir = "/refinery-data/"
 
     # Allows for django commands to run in a standalone script
     django.setup()
