@@ -11,15 +11,15 @@ RUN ( echo ""; \
       echo "priority = 1000"; ) \
     >> supervisord.conf
 
-# We want higlass to access the default viewconf relative to our current container's base url
-RUN sed -i 's/"#higlass","\/api/"#higlass","\.\.\/api/g' \
+# We want higlass launcher to access the default viewconf relative to our current location
+RUN sed -i 's@"#higlass","/api@"#higlass","./api@g' \
 /home/higlass/projects/higlass-website/assets/scripts/hg-launcher.js
 
-# Append script to index.html to open higlass in `/app` view
-RUN ( echo ""; \
-      echo "<script>"; \
-      echo "  window.location.href = window.location.href + 'app/';"; \
-      echo "</script>"; ) \
-    >> /home/higlass/projects/higlass-website/index.html
+# Have the default view_conf fixture point to a url relative to our current location
+RUN sed -i 's@"/api/v1",@"./api/v1",@g' \
+/home/higlass/projects/higlass-server/default-viewconf-fixture.xml
+
+# Use the "/app" view's html
+RUN mv /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
 
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
