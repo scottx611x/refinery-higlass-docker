@@ -12,18 +12,21 @@ RUN ( echo ""; \
     >> supervisord.conf
 
 # We want higlass launcher to access the default viewconf relative to our current location
-RUN sed -i 's@"#higlass","/api@"#higlass","./api@g' \
+RUN sed -i 's@"#higlass","\/api@"#higlass","\.\/api@g' \
 /home/higlass/projects/higlass-website/assets/scripts/hg-launcher.js
 
 # Have the default view_conf fixture point to a url relative to our current location
-RUN sed -i 's@"/api/v1",@"./api/v1",@g' \
+RUN sed -i 's@"\/api\/v1",@"\.\/api\/v1",@g' \
 /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
 
 # Use the "/app" view's html
 RUN mv /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
 
 # Have the default view_conf fixture point to a url relative to our current location
-RUN sed -i 's@"../@"./@g' \
+RUN sed -i 's@"\.\.\/@"\.\/@g' \
 /home/higlass/projects/higlass-website/index.html
+
+# Higlass currently has no favicon.png causing a 500 Error
+RUN touch higlass-website/assets/images/favicon.png
 
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
