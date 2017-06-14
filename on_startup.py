@@ -20,7 +20,8 @@ def populate_higlass_data_directory(data_dir):
 
     for url in config_data["file_relationships"]:
         try:
-            response = requests.get(url)
+            # Streaming GET for potentially large files
+            response = requests.get(url, stream=True)
         except RequestException as e:
             raise RuntimeError(
                 "Something went wrong while fetching file from {} : {}".format(
@@ -30,7 +31,12 @@ def populate_higlass_data_directory(data_dir):
             )
         else:
             with open('{}{}'.format(data_dir, url.split("/")[-1]), 'wb') as f:
-                f.write(response.content)
+                for chunk in response.iter_content(chunk_size=1024):
+                    # filter out KEEP-ALIVE new chunks
+                    if chunk:
+                        f.write(chunk)
+        finally:
+            response.close()
 
 
 def ingest_tilesets(data_dir):
