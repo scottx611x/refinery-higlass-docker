@@ -22,7 +22,7 @@ RUN sed -i 's@"\/api\/v1",@"\.\/api\/v1",@g' \
 # Use the "/app" view's html
 RUN mv /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
 
-# Have the default view_conf fixture point to a url relative to our current location
+# Replace `../` with `./` for script/img/css fetching
 RUN sed -i 's@"\.\.\/@"\.\/@g' \
 /home/higlass/projects/higlass-website/index.html
 
