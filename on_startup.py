@@ -2,6 +2,7 @@ import glob
 import json
 import logging
 import requests
+import subprocess
 from requests.exceptions import RequestException
 
 import django
@@ -91,6 +92,11 @@ def get_filetype(filename):
     else:
         return filetype
 
+
+def swap_waiting_page():
+    subprocess.call(["mv", "/home/higlass/projects/higlass-website/app/index.html",
+                     "/home/higlass/projects/higlass-website/index.html"])
+
 if __name__ == '__main__':
     data_dir = "/refinery-data/"
 
@@ -99,3 +105,6 @@ if __name__ == '__main__':
 
     populate_higlass_data_directory(data_dir)
     ingest_tilesets(data_dir)
+
+    # Don't switch page until data ingested
+    swap_waiting_page()

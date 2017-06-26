@@ -3,6 +3,9 @@ FROM gehlenborglab/higlass
 COPY on_startup.py /home/higlass/projects/higlass-server
 COPY input.json $HIGLASS_SERVER_BASE_DIR
 
+# Display our waiting page until higlass ingests all tilesets
+COPY index.html /home/higlass/projects/higlass-website/index.html
+
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
 # be greater than the default of `999` so that it starts up last
 RUN ( echo ""; \
@@ -16,11 +19,13 @@ RUN sed -i 's@"#higlass","\/api@"#higlass","\.\/api@g' \
 /home/higlass/projects/higlass-website/assets/scripts/hg-launcher.js
 
 # Have the default view_conf fixture point to a url relative to our current location
-RUN sed -i 's@"\/api\/v1",@"\.\/api\/v1",@g' \
+RUN sed -i 's@"\/api\/v1",@"\.\/api\/v1"@g' \
 /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
 
-# Use the "/app" view's html
-RUN mv /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
+# Remove public data source
+RUN sed -i 's@"http://higlass.io/api/v1"@@g' \
+/home/higlass/projects/higlass-server/default-viewconf-fixture.xml
+
 
 # Replace `../` with `./` for script/img/css fetching
 RUN sed -i 's@"\.\.\/@"\.\/@g' \
