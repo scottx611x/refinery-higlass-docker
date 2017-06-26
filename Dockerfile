@@ -27,9 +27,9 @@ RUN sed -i 's@"http://higlass.io/api/v1"@@g' \
 /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
 
 
-# Replace `../` with `./` for script/img/css fetching
-RUN sed -i 's@"\.\.\/@"\.\/@g' \
-/home/higlass/projects/higlass-website/index.html
+# # Replace `../` with `./` for script/img/css fetching
+# RUN sed -i 's@"\.\.\/@"\.\/@g' \
+# /home/higlass/projects/higlass-website/index.html
 
 # Higlass currently has no favicon.png causing a 500 Error
 RUN touch higlass-website/assets/images/favicon.png
