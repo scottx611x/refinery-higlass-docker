@@ -93,9 +93,14 @@ def get_filetype(filename):
         return filetype
 
 
-def swap_waiting_page():
-    subprocess.call(["mv", "/home/higlass/projects/higlass-website/app/index.html",
-                     "/home/higlass/projects/higlass-website/index.html"])
+def swap_app_html():
+    subprocess.call(
+        [
+            "mv",
+            "/home/higlass/projects/higlass-website/app/index.html",
+            "/home/higlass/projects/higlass-website/index.html"
+        ]
+    )
 
 if __name__ == '__main__':
     data_dir = "/refinery-data/"
@@ -107,4 +112,4 @@ if __name__ == '__main__':
     ingest_tilesets(data_dir)
 
     # Don't switch page until data ingested
-    swap_waiting_page()
+    swap_app_html()
