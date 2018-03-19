@@ -1,7 +1,6 @@
 FROM gehlenborglab/higlass
 
 COPY on_startup.py /home/higlass/projects/higlass-server
-COPY input.json $HIGLASS_SERVER_BASE_DIR
 
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
