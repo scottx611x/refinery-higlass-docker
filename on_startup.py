@@ -1,6 +1,7 @@
 import glob
 import json
 import logging
+import os
 import requests
 import subprocess
 from requests.exceptions import RequestException
@@ -16,8 +17,7 @@ def populate_higlass_data_directory(data_dir):
     Download remote files specified by urls in the data provided by a GET to the provided INPUT_JSON_URL
     :param data_dir: <String> Path to directory to populate with data
     """
-    with open("/data/input.json") as f:
-        config_data = json.loads(f.read())
+    config_data = requests.get(os.environ["INPUT_JSON_URL"]).json()
 
     for url in config_data["file_relationships"]:
         try:
