@@ -27,7 +27,7 @@ class CommandlineTest(unittest.TestCase):
     def test_hello(self):
         self.assertRun('echo "hello?"', [r'hello'])
 
-    # Test if the data we specify in input.json gets ingested properly by
+    # Test if the data we specify in INPUT_JSON_URL gets ingested properly by
     # higlass server upon container startup
     def test_data_ingested(self):
         time.sleep(5)

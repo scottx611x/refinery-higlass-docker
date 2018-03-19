@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def populate_higlass_data_directory(data_dir):
     """
-    Download remote files specified by urls in the input.json file
+    Download remote files specified by urls in the data provided by a GET to the provided INPUT_JSON_URL
     :param data_dir: <String> Path to directory to populate with data
     """
     with open("/data/input.json") as f:
