@@ -19,7 +19,8 @@ CONTAINER_NAME="container-$STAMP$SUFFIX"
 
 mkdir "/tmp/$CONTAINER_NAME"
 
-docker run --name $CONTAINER_NAME \
+docker run --env INPUT_JSON_URL=http://data.cloud.refinery-platform.org.s3.amazonaws.com/data/scott/sample-higlass.json \
+		   --name $CONTAINER_NAME \
            --detach \
            --publish-all \
            --volume /tmp/$CONTAINER_NAME:/refinery-data \
