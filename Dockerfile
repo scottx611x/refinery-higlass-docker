@@ -1,7 +1,10 @@
-FROM gehlenborglab/higlass
+FROM gehlenborglab/higlass:v0.2.61
 
 COPY on_startup.py /home/higlass/projects/higlass-server
 
+
+# Swap the "app" html with the main html to always provide the /app/ view
+RUN cp /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
 # be greater than the default of `999` so that it starts up last
