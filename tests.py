@@ -23,7 +23,9 @@ class CommandlineTest(unittest.TestCase):
 
     def assertRun(self, command, res=[r'']):
         output = subprocess.check_output(
-            command.format(**os.environ), shell=True).strip()
+            command.format(**os.environ),
+            shell=True
+        ).strip()
         for re in res:
             self.assertRegexpMatches(output, re)
 
