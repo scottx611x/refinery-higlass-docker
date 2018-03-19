@@ -3,8 +3,6 @@ FROM gehlenborglab/higlass
 COPY on_startup.py /home/higlass/projects/higlass-server
 COPY input.json $HIGLASS_SERVER_BASE_DIR
 
-# Display our waiting page until higlass ingests all tilesets
-COPY index.html /home/higlass/projects/higlass-website/index.html
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
 # be greater than the default of `999` so that it starts up last
