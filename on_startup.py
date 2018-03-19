@@ -11,6 +11,38 @@ from django.core.management import call_command
 
 logger = logging.getLogger(__name__)
 
+FILE_TYPE = "filetype"
+DATA_TYPE = "datatype"
+
+big_wig_mappings = {
+    FILE_TYPE: "bigwig",
+    DATA_TYPE: "vector"
+}
+FILENAME_MAPPINGS = {
+    "beddb": {
+        FILE_TYPE: "beddb",
+        DATA_TYPE: "bedlike"
+    },
+    "bigwig": big_wig_mappings,
+    "bw": big_wig_mappings,
+    "cool": {
+        FILE_TYPE: "cooler",
+        DATA_TYPE: "matrix"
+    },
+    "db": {
+        FILE_TYPE: "arrowhead-domains",
+        DATA_TYPE: "bed2ddb"
+    },
+    "hibed": {
+        FILE_TYPE: "hibed",
+        DATA_TYPE: "stacked-interval"
+    },
+    "multires": {
+        FILE_TYPE: "multivec",
+        DATA_TYPE: "multi-vector"
+    }
+}
+
 
 def populate_higlass_data_directory(data_dir):
     """
@@ -46,51 +78,24 @@ def ingest_tilesets(data_dir):
    management command
    :param data_dir: <String> Path to directory populated with data to ingest
    """
-    files_to_ingest = glob.glob(
-        '{}*multires.*'.format(data_dir)
-    )
+    files_to_ingest = glob.glob('{}*.*'.format(data_dir))
 
     for filename in files_to_ingest:
+        try:
+            filename_mappings = FILENAME_MAPPINGS[
+                filename.split(".")[-1].lower()]
+        except KeyError:
+            raise RuntimeError(
+                "Could not determine filename_mappings from filename: {}".format(
+                    filename
+                )
+            )
         call_command(
             "ingest_tileset",
             filename="{}".format(filename),
-            filetype=get_filetype(filename),
-            datatype=get_datatype(filename)
+            filetype=filename_mappings[FILE_TYPE],
+            datatype=filename_mappings[DATA_TYPE]
         )
-
-
-def get_datatype(filename):
-    datatype_mapping = {
-        "cool": "matrix",
-        "hitile": "vector"
-    }
-    try:
-        datatype = datatype_mapping[filename.split(".")[-1]]
-    except KeyError as e:
-        raise RuntimeError(
-            "Could not determine datatype from filename: {}".format(
-                filename
-            )
-        )
-    else:
-        return datatype
-
-
-def get_filetype(filename):
-    filetype_mapping = {
-        "cool": "cooler",
-        "hitile": "hitile"
-    }
-    try:
-        filetype = filetype_mapping[filename.split(".")[-1]]
-    except KeyError:
-        raise RuntimeError(
-            "Could not determine filetype from filename: {}".format(
-                filename
-            )
-        )
-    else:
-        return filetype
 
 if __name__ == '__main__':
     data_dir = "/refinery-data/"
