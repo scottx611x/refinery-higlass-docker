@@ -14,6 +14,9 @@ RUN ( echo ""; \
       echo "priority = 1000"; ) \
     >> supervisord.conf
 
+# Don't start nginx automatically. We'll start it manually after tilesets have been ingested
+RUN sed -i '/\[program\:nginx\]/a autostart \= false' supervisord.conf
+
 # We want higlass launcher to access the default viewconf relative to our current location
 RUN sed -i 's@"#higlass","\/api@"#higlass","\.\/api@g' \
 /home/higlass/projects/higlass-website/assets/scripts/hg-launcher.js

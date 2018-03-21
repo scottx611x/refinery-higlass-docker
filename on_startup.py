@@ -105,3 +105,6 @@ if __name__ == '__main__':
 
     populate_higlass_data_directory(data_dir)
     ingest_tilesets(data_dir)
+
+    # Start Nginx only after tilesets have been ingested
+    subprocess.run(["/usr/sbin/nginx"])
