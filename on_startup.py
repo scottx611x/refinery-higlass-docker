@@ -72,30 +72,36 @@ def populate_higlass_data_directory(data_dir):
             response.close()
 
 
+def get_filename_mapping(filename):
+    try:
+        return FILENAME_MAPPINGS[filename.split(".")[-1].lower()]
+    except KeyError:
+        raise RuntimeError(
+            "Could not determine filename_mappings from filename: {}".format(
+                filename
+            )
+        )
+
+
+def ingest_tileset(filename):
+    filename_mapping = get_filename_mapping(filename)
+    call_command(
+        "ingest_tileset",
+        filename=filename,
+        filetype=filename_mapping[FILE_TYPE],
+        datatype=filename_mapping[DATA_TYPE]
+    )
+
+
 def ingest_tilesets(data_dir):
     """
-   Ingest previously downloaded files into higlass-server w/ django
-   management command
-   :param data_dir: <String> Path to directory populated with data to ingest
-   """
+    Ingest previously downloaded files into higlass-server w/ django
+    management command
+    :param data_dir: <String> Path to directory populated with data to ingest
+    """
     files_to_ingest = glob.glob('{}*.*'.format(data_dir))
-
     for filename in files_to_ingest:
-        try:
-            filename_mappings = FILENAME_MAPPINGS[
-                filename.split(".")[-1].lower()]
-        except KeyError:
-            raise RuntimeError(
-                "Could not determine filename_mappings from filename: {}".format(
-                    filename
-                )
-            )
-        call_command(
-            "ingest_tileset",
-            filename="{}".format(filename),
-            filetype=filename_mappings[FILE_TYPE],
-            datatype=filename_mappings[DATA_TYPE]
-        )
+        ingest_tileset(filename)
 
 if __name__ == '__main__':
     data_dir = "/refinery-data/"
