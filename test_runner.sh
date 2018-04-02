@@ -19,7 +19,20 @@ CONTAINER_NAME="container-$STAMP$SUFFIX"
 
 mkdir "/tmp/$CONTAINER_NAME"
 
-docker run --env INPUT_JSON_URL=http://data.cloud.refinery-platform.org.s3.amazonaws.com/data/scott/sample-higlass.json \
+PYTHON_SERVER_PORT=9999
+
+get_local_url() {
+    local _ip _line
+    while IFS=$': \t' read -a _line ;do
+        [ -z "${_line%inet}" ] &&
+           _ip=${_line[${#_line[1]}>4?1:2]} &&
+           [ "${_ip#127.0.0.1}" ] && echo http://$_ip:$PYTHON_SERVER_PORT && return 0
+      done< <(LANG=C /sbin/ifconfig)
+}
+
+python -m SimpleHTTPServer $PYTHON_SERVER_PORT &
+PYTHON_SERVER_PID=$!
+docker run --env INPUT_JSON_URL=$(get_local_url)/test-data/input.json \
            --name $CONTAINER_NAME \
            --detach \
            --publish-all \
@@ -28,4 +41,5 @@ docker run --env INPUT_JSON_URL=http://data.cloud.refinery-platform.org.s3.amazo
 
 python tests.py
 
+kill $PYTHON_SERVER_PID
 rm -r "/tmp/$CONTAINER_NAME"
