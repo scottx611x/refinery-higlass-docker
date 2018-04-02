@@ -2,6 +2,7 @@ import json
 import os
 import requests
 import subprocess
+import sys
 import time
 import unittest
 
@@ -9,19 +10,22 @@ import unittest
 class CommandlineTest(unittest.TestCase):
 
     def setUp(self):
-        command = "docker port container-{STAMP}{SUFFIX} | perl -pne 's/.*://'".format(
-            **os.environ)
+        command = "docker port container-{STAMP}{SUFFIX} | " \
+            "perl -pne 's/.*://'".format(**os.environ)
         os.environ['PORT'] = subprocess.check_output(
             command, shell=True).strip().decode('utf-8')
-        self.tilesets_url = 'http://localhost:{PORT}/api/v1/tilesets/'.format(
-            **os.environ)
+        self.base_url = "http://localhost:{PORT}/".format(**os.environ)
+        self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
         while True:
-            if 0 == subprocess.call('curl --fail --silent ' + self.tilesets_url + ' > /dev/null', shell=True):
+            if 0 == subprocess.call(
+                'curl --fail --silent ' + self.tilesets_url + ' > /dev/null',
+                shell=True
+            ):
                 break
             print('still waiting for server...')
-            time.sleep(1)
+            time.sleep(2)
 
-    def assertRun(self, command, res=[r'']):
+    def assert_run(self, command, res=[r'']):
         output = subprocess.check_output(
             command.format(**os.environ),
             shell=True
@@ -31,17 +35,18 @@ class CommandlineTest(unittest.TestCase):
 
     # Tests:
     def test_hello(self):
-        self.assertRun('echo "hello?"', [r'hello'])
+        self.assert_run('echo "hello?"', [r'hello'])
+
+    def test_home_page(self):
+        response = requests.get(self.base_url)
+        self.assertEqual(response.status_code, 200)
 
     # Test if the data we specify in INPUT_JSON_URL gets ingested properly by
     # higlass server upon container startup
     def test_data_ingested(self):
         time.sleep(5)
         response = json.loads(requests.get(self.tilesets_url).content)
-        self.assertEqual(
-            response["results"][0]["name"],
-            "dixon2012-h1hesc-hindiii-allreps-filtered.1000kb.multires.cool"
-        )
+        self.assertEqual(response["count"], 12)
 
 
 if __name__ == '__main__':
@@ -58,4 +63,4 @@ if __name__ == '__main__':
         print('PASS!')
     else:
         print('FAIL!')
-        exit(1)
+        sys.exit(1)
