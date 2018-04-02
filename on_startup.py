@@ -1,69 +1,69 @@
-import glob
-import json
-import logging
 import os
 import requests
 import subprocess
-from requests.exceptions import RequestException
 
 import django
+
+from requests.exceptions import RequestException
+
 from django.core.management import call_command
 
-logger = logging.getLogger(__name__)
+HIGLASS_DATA_TYPE = "higlass_data_type"
+HIGLASS_FILE_TYPE = "higlass_file_type"
 
-FILE_TYPE = "filetype"
-DATA_TYPE = "datatype"
+TILE_SETS = {}
 
-big_wig_mappings = {
-    FILE_TYPE: "bigwig",
-    DATA_TYPE: "vector"
-}
-FILENAME_MAPPINGS = {
-    "beddb": {
-        FILE_TYPE: "beddb",
-        DATA_TYPE: "bedlike"
-    },
-    "bigwig": big_wig_mappings,
-    "bw": big_wig_mappings,
-    "cool": {
-        FILE_TYPE: "cooler",
-        DATA_TYPE: "matrix"
-    },
-    "db": {
-        FILE_TYPE: "arrowhead-domains",
-        DATA_TYPE: "bed2ddb"
-    },
-    "hibed": {
-        FILE_TYPE: "hibed",
-        DATA_TYPE: "stacked-interval"
-    },
-    "multires": {
-        FILE_TYPE: "multivec",
-        DATA_TYPE: "multi-vector"
-    }
-}
+
+def get_refinery_input_as_json():
+    return requests.get(os.environ["INPUT_JSON_URL"]).json()
 
 
 def populate_higlass_data_directory(data_dir):
     """
-    Download remote files specified by urls in the data provided by a GET to the provided INPUT_JSON_URL
+    Download remote files specified by urls in the data provided by a GET to
+    the provided INPUT_JSON_URL
     :param data_dir: <String> Path to directory to populate with data
     """
-    config_data = requests.get(os.environ["INPUT_JSON_URL"]).json()
+    config_data = get_refinery_input_as_json()
 
-    for url in config_data["file_relationships"]:
+    for refinery_node_uuid in config_data["node_info"]:
+        TILE_SETS[refinery_node_uuid] = {}
+
+        refinery_node = config_data["node_info"][refinery_node_uuid]
+        TILE_SETS[refinery_node_uuid]["file_url"] = refinery_node["file_url"]
+        TILE_SETS[refinery_node_uuid]["file_name"] = refinery_node[
+            "file_url"].split("/")[-1]
+
+        for key in refinery_node["node_solr_info"].keys():
+            if HIGLASS_FILE_TYPE in key.lower():
+                TILE_SETS[refinery_node_uuid][HIGLASS_FILE_TYPE] = (
+                    refinery_node["node_solr_info"][key]
+                )
+            if HIGLASS_DATA_TYPE in key.lower():
+                TILE_SETS[refinery_node_uuid][HIGLASS_DATA_TYPE] = (
+                    refinery_node["node_solr_info"][key]
+                )
+
         try:
             # Streaming GET for potentially large files
-            response = requests.get(url, stream=True)
+            response = requests.get(
+                TILE_SETS[refinery_node_uuid]["file_url"],
+                stream=True
+            )
         except RequestException as e:
             raise RuntimeError(
                 "Something went wrong while fetching file from {} : {}".format(
-                    url,
+                    TILE_SETS[refinery_node_uuid]["file_url"],
                     e
                 )
             )
         else:
-            with open('{}{}'.format(data_dir, url.split("/")[-1]), 'wb') as f:
+            with open(
+                '{}{}'.format(
+                    data_dir,
+                    TILE_SETS[refinery_node_uuid]["file_name"]
+                ), 'wb'
+            ) as f:
                 for chunk in response.iter_content(chunk_size=1024):
                     # filter out KEEP-ALIVE new chunks
                     if chunk:
@@ -72,40 +72,26 @@ def populate_higlass_data_directory(data_dir):
             response.close()
 
 
-def get_filename_mapping(filename):
-    try:
-        return FILENAME_MAPPINGS[filename.split(".")[-1].lower()]
-    except KeyError:
-        raise RuntimeError(
-            "Could not determine filename_mappings from filename: {}".format(
-                filename
-            )
-        )
-
-
-def ingest_tileset(filename):
-    filename_mapping = get_filename_mapping(filename)
-    call_command(
-        "ingest_tileset",
-        filename=filename,
-        filetype=filename_mapping[FILE_TYPE],
-        datatype=filename_mapping[DATA_TYPE]
-    )
-
-
 def ingest_tilesets(data_dir):
     """
     Ingest previously downloaded files into higlass-server w/ django
     management command
     :param data_dir: <String> Path to directory populated with data to ingest
     """
-    files_to_ingest = glob.glob('{}*.*'.format(data_dir))
-    for filename in files_to_ingest:
-        ingest_tileset(filename)
+    for refinery_node_uuid in TILE_SETS.keys():
+        refinery_node_info = TILE_SETS[refinery_node_uuid]
+        file_path = data_dir + refinery_node_info["file_name"]
+
+        call_command(
+            "ingest_tileset",
+            filename=file_path,
+            filetype=refinery_node_info[HIGLASS_FILE_TYPE],
+            datatype=refinery_node_info[HIGLASS_DATA_TYPE]
+        )
+
 
 if __name__ == '__main__':
     data_dir = "/refinery-data/"
-
     # Allows for django commands to run in a standalone script
     django.setup()
 
