@@ -1,0 +1,13 @@
+Sample Name,Data File,Organism, Higlass File Type, Higlass Data Type
+dixon2012-h1hesc-hindiii-allreps-filtered.1000kb.multires.cool,https://s3.amazonaws.com/pkerp/public/dixon2012-h1hesc-hindiii-allreps-filtered.1000kb.multires.cool,Human,cooler,matrix
+G15509.K-562.2_sampleDown.multires.cool,https://s3.amazonaws.com/pkerp/public/G15509.K-562.2_sampleDown.multires.cool,Human,cooler,matrix
+Dixon2012-J1-NcoI-R1-filtered.100kb.multires.cool,https://s3.amazonaws.com/pkerp/public/Dixon2012-J1-NcoI-R1-filtered.100kb.multires.cool,Human,cooler,matrix
+gene_annotations.short.db,https://s3.amazonaws.com/pkerp/public/gene_annotations.short.db,Human,beddb,gene-annotations
+cnv_short.hibed,https://s3.amazonaws.com/pkerp/public/cnv_short.hibed,Human,hibed,stacked-interval
+arrowhead_domains_short.txt.multires.db,https://s3.amazonaws.com/pkerp/public/arrowhead_domains_short.txt.multires.db,Human,bed2ddb,arrowhead-domains
+hiccups_loops_short.txt.multires.db,https://s3.amazonaws.com/pkerp/public/hiccups_loops_short.txt.multires.db,Human,bed2ddb,arrowhead-domains
+chromSizes.tsv,https://s3.amazonaws.com/pkerp/public/chromSizes.tsv,Human,chromsizes-csv,chromsizes
+Rao_RepH_GM12878_InsulationScore.txt.multires.db,https://s3.amazonaws.com/pkerp/public/Rao_RepH_GM12878_InsulationScore.txt.multires.db,Human,bed2ddb,2d-rectangle-domains
+hic-resolutions.cool,https://s3.amazonaws.com/pkerp/public/hic-resolutions.cool,Human,cooler,matrix
+wgEncodeCaltechRnaSeqHuvecR1x75dTh1014IlnaPlusSignalRep2.bigWig,https://s3.amazonaws.com/pkerp/public/wgEncodeCaltechRnaSeqHuvecR1x75dTh1014IlnaPlusSignalRep2.bigWig,Human,bigwig,vector
+wgEncodeCaltechRnaSeqHuvecR1x75dTh1014IlnaPlusSignalRep2.hitile,https://s3.amazonaws.com/pkerp/public/wgEncodeCaltechRnaSeqHuvecR1x75dTh1014IlnaPlusSignalRep2.hitile,Human,hitile,vector
