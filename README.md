@@ -8,3 +8,20 @@
 - docker
 - git
 - python
+
+### Running the Container:
+- `pip install -r requirements.txt`
+- `./test_runner.sh`
+
+If tests pass, then you'll be provided with some info about the currently running container:
+```
+Ran 3 tests in 37.126s
+
+OK
+browse:  http://localhost:32921/
+shell:   docker exec --interactive --tty container-2018-04-03_10-11-28-standalone bash
+logs:    docker exec container-2018-04-03_10-11-28-standalone ./logs.sh
+PASS!
+```
+
+
