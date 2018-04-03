@@ -2,7 +2,6 @@ import json
 import os
 import requests
 import subprocess
-import sys
 import time
 import unittest
 
@@ -66,4 +65,3 @@ if __name__ == '__main__':
         print('PASS!')
     else:
         print('FAIL!')
-        sys.exit(1)
