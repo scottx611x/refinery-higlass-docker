@@ -4,3 +4,7 @@
 🐳
 ```docker pull scottx611x/refinery-higlass-docker```
 
+### Pre-Reqs:
+- docker
+- git
+- python
