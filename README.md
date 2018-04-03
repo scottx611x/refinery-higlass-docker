@@ -13,7 +13,7 @@
 - `pip install -r requirements.txt`
 - `./test_runner.sh`
 
-If tests pass, then you'll be provided with some info about the currently running container:
+If the tests pass you'll be provided with some info about the currently running container:
 ```
 Ran 3 tests in 37.126s
 
