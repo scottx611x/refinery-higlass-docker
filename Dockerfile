@@ -1,18 +1,7 @@
 FROM gehlenborglab/higlass:v0.2.61
 
-COPY on_startup.py /home/higlass/projects/higlass-server
-
-
 # Swap the "app" html with the main html to always provide the /app/ view
 RUN cp /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
-
-# Append to the supervisord.conf and set the priority of `on_startup.py` to
-# be greater than the default of `999` so that it starts up last
-RUN ( echo ""; \
-      echo "[program:on_startup]"; \
-      echo "command = python /home/higlass/projects/higlass-server/on_startup.py"; \
-      echo "priority = 1000"; ) \
-    >> supervisord.conf
 
 # Don't start nginx automatically. We'll start it manually after tilesets have been ingested
 RUN sed -i '/\[program\:nginx\]/a autostart \= false' supervisord.conf
@@ -29,7 +18,6 @@ RUN sed -i 's@"\/api\/v1",@"\.\/api\/v1"@g' \
 RUN sed -i 's@"http://higlass.io/api/v1"@@g' \
 /home/higlass/projects/higlass-server/default-viewconf-fixture.xml
 
-
 # Replace `../` with `./` for script/img/css fetching
 RUN sed -i 's@"\.\.\/@"\.\/@g' \
 /home/higlass/projects/higlass-website/index.html
@@ -38,3 +26,13 @@ RUN sed -i 's@"\.\.\/@"\.\/@g' \
 RUN touch higlass-website/assets/images/favicon.png
 
 ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
+
+COPY on_startup.py /home/higlass/projects/higlass-server
+
+# Append to the supervisord.conf and set the priority of `on_startup.py` to
+# be greater than the default of `999` so that it starts up last
+RUN ( echo ""; \
+      echo "[program:on_startup]"; \
+      echo "command = python /home/higlass/projects/higlass-server/on_startup.py"; \
+      echo "priority = 1000"; ) \
+    >> supervisord.conf
