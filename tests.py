@@ -16,14 +16,17 @@ class CommandlineTest(unittest.TestCase):
             command, shell=True).strip().decode('utf-8')
         self.base_url = "http://localhost:{PORT}/".format(**os.environ)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
-        while True:
+
+        server_check_count = 0
+        while server_check_count <= 5:
             if 0 == subprocess.call(
                 'curl --fail --silent ' + self.tilesets_url + ' > /dev/null',
                 shell=True
             ):
                 break
             print('still waiting for server...')
-            time.sleep(2)
+            time.sleep(5)
+            server_check_count += 1
 
     def assert_run(self, command, res=[r'']):
         output = subprocess.check_output(
