@@ -21,7 +21,7 @@ mkdir "/tmp/$CONTAINER_NAME"
 
 PYTHON_SERVER_PORT=9999
 
-get_local_url() {
+get_python_server_url() {
     local _ip _line
     while IFS=$': \t' read -a _line ;do
         [ -z "${_line%inet}" ] &&
@@ -30,9 +30,11 @@ get_local_url() {
       done< <(LANG=C /sbin/ifconfig)
 }
 
+# Spin up a server so that the container can GET input data from the `test-data` dir
 python -m SimpleHTTPServer $PYTHON_SERVER_PORT &
 PYTHON_SERVER_PID=$!
-docker run --env INPUT_JSON_URL=$(get_local_url)/test-data/input.json \
+
+docker run --env INPUT_JSON_URL=$(get_python_server_url)/test-data/input.json \
            --name $CONTAINER_NAME \
            --detach \
            --publish-all \
