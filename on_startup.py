@@ -8,95 +8,89 @@ from requests.exceptions import RequestException
 
 from django.core.management import call_command
 
-HIGLASS_DATA_TYPE = "higlass_data_type"
-HIGLASS_FILE_TYPE = "higlass_file_type"
+DATA_DIRECTORY = "/refinery-data/"
+DATA_TYPE = "data_type"
+FILE_URL = "file_url"
+FILE_NAME = "file_name"
+FILE_PATH = "file_path"
+FILE_TYPE = "file_type"
+HIGLASS_DATA_TYPE = "higlass_data_type_Characteristics_generic_s"
+HIGLASS_FILE_TYPE = "higlass_file_type_Characteristics_generic_s"
+NODE_INFO = "node_info"
+NODE_SOLR_INFO = "node_solr_info"
 
-TILE_SETS = {}
 
+class Tileset(object):
 
-def get_refinery_input_as_json():
-    return requests.get(os.environ["INPUT_JSON_URL"]).json()
+    def __init__(self, refinery_node):
+        self.file_url = refinery_node[FILE_URL]
+        self.file_name = refinery_node[FILE_URL].split("/")[-1]
+        self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
+        self.file_type = refinery_node[NODE_SOLR_INFO][HIGLASS_FILE_TYPE]
+        self.data_type = refinery_node[NODE_SOLR_INFO][HIGLASS_DATA_TYPE]
 
-
-def populate_higlass_data_directory(data_dir):
-    """
-    Download remote files specified by urls in the data provided by a GET to
-    the provided INPUT_JSON_URL
-    :param data_dir: <String> Path to directory to populate with data
-    """
-    config_data = get_refinery_input_as_json()
-
-    for refinery_node_uuid in config_data["node_info"]:
-        TILE_SETS[refinery_node_uuid] = {}
-
-        refinery_node = config_data["node_info"][refinery_node_uuid]
-        TILE_SETS[refinery_node_uuid]["file_url"] = refinery_node["file_url"]
-        TILE_SETS[refinery_node_uuid]["file_name"] = refinery_node[
-            "file_url"].split("/")[-1]
-
-        for key in refinery_node["node_solr_info"].keys():
-            if HIGLASS_FILE_TYPE in key.lower():
-                TILE_SETS[refinery_node_uuid][HIGLASS_FILE_TYPE] = (
-                    refinery_node["node_solr_info"][key]
-                )
-            if HIGLASS_DATA_TYPE in key.lower():
-                TILE_SETS[refinery_node_uuid][HIGLASS_DATA_TYPE] = (
-                    refinery_node["node_solr_info"][key]
-                )
-
+    def download(self):
+        """
+        Download a tileset from a `file_url` to disk at a`file_path`
+        """
         try:
             # Streaming GET for potentially large files
-            response = requests.get(
-                TILE_SETS[refinery_node_uuid]["file_url"],
-                stream=True
-            )
+            response = requests.get(self.file_url, stream=True)
         except RequestException as e:
             raise RuntimeError(
                 "Something went wrong while fetching file from {} : {}".format(
-                    TILE_SETS[refinery_node_uuid]["file_url"],
+                    self.file_url,
                     e
                 )
             )
-        else:
-            with open(
-                '{}{}'.format(
-                    data_dir,
-                    TILE_SETS[refinery_node_uuid]["file_name"]
-                ), 'wb'
-            ) as f:
-                for chunk in response.iter_content(chunk_size=1024):
-                    # filter out KEEP-ALIVE new chunks
-                    if chunk:
-                        f.write(chunk)
-        finally:
-            response.close()
 
+        with open(self.file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                # filter out KEEP-ALIVE new chunks
+                if chunk:
+                    f.write(chunk)
 
-def ingest_tilesets(data_dir):
-    """
-    Ingest previously downloaded files into higlass-server w/ django
-    management command
-    :param data_dir: <String> Path to directory populated with data to ingest
-    """
-    for refinery_node_uuid in TILE_SETS.keys():
-        refinery_node_info = TILE_SETS[refinery_node_uuid]
-        file_path = data_dir + refinery_node_info["file_name"]
+        response.close()
 
+    def ingest(self):
+        """
+        Ingest previously downloaded files into higlass-server w/ django
+        management command
+        :param tileset_dict: dict containing information about a tileset
+        """
         call_command(
             "ingest_tileset",
-            filename=file_path,
-            filetype=refinery_node_info[HIGLASS_FILE_TYPE],
-            datatype=refinery_node_info[HIGLASS_DATA_TYPE]
+            filename=self.file_path,
+            filetype=self.file_type,
+            datatype=self.data_type
         )
 
 
+def get_refinery_input():
+    """ Make a GET request to acquire the input data for the container"""
+    return requests.get(os.environ["INPUT_JSON_URL"]).json()
+
+
+def main():
+    """
+    Download remote files specified by urls in the data provided by a GET to
+    the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
+    Tileset objects
+    """
+    config_data = get_refinery_input()
+
+    for refinery_node_uuid in config_data[NODE_INFO]:
+        refinery_node = config_data[NODE_INFO][refinery_node_uuid]
+        tileset = Tileset(refinery_node)
+        tileset.download()
+        tileset.ingest()
+
+
 if __name__ == '__main__':
-    data_dir = "/refinery-data/"
     # Allows for django commands to run in a standalone script
     django.setup()
 
-    populate_higlass_data_directory(data_dir)
-    ingest_tilesets(data_dir)
+    main()
 
     # Start Nginx only after tilesets have been ingested
     subprocess.run(["/usr/sbin/nginx"])
