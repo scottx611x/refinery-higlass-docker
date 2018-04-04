@@ -31,7 +31,7 @@ class Tileset(object):
 
     def download(self):
         """
-        Download a tileset from a `file_url` to disk at a`file_path`
+        Download a tileset from a `file_url` to disk at a `file_path`
         """
         try:
             # Streaming GET for potentially large files
