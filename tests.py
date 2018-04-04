@@ -16,7 +16,7 @@ class CommandlineTest(unittest.TestCase):
         self.base_url = "http://localhost:{PORT}/".format(**os.environ)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
 
-        for i in range(60):
+        for i in range(60):  # a minute is probably gratuitous
             try:
                 requests.get(self.tilesets_url)
                 break
