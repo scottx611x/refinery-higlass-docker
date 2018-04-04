@@ -46,7 +46,6 @@ docker run --env INPUT_JSON_URL=$(get_python_server_url)/test-data/input.json \
            --volume /tmp/$CONTAINER_NAME:/refinery-data \
            image-$STAMP
 
-python tests.py
+python tests.py $PYTHON_SERVER_PID
 
-kill $PYTHON_SERVER_PID
 rm -r "/tmp/$CONTAINER_NAME"

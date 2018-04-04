@@ -2,8 +2,11 @@ import json
 import os
 import requests
 import subprocess
+import sys
 import time
 import unittest
+
+PYTHON_TEST_SERVER_PID = sys.argv[1]
 
 
 class CommandlineTest(unittest.TestCase):
@@ -60,7 +63,12 @@ if __name__ == '__main__':
     ]
     for line in lines:
         print(line.format(**os.environ))
+
+    # Kill PYTHON_TEST_SERVER
+    subprocess.call(["kill", PYTHON_TEST_SERVER_PID])
+
     if result.wasSuccessful():
         print('PASS!')
     else:
         print('FAIL!')
+        exit(1)
