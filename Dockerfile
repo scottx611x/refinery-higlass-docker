@@ -30,7 +30,9 @@ ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
 COPY on_startup.py /home/higlass/projects/higlass-server
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
-# be greater than the default of `999` so that it starts up after uwsgi processes
+# be greater than the default of `999` so that it starts up after uwsgi processes. 
+# Running the `ingest_tileset` Django management command requires things like db migrations to have been applied, 
+# which the uwsgi stuff handles.
 RUN ( echo; \
       echo "[program:on_startup]"; \
       echo "command = python /home/higlass/projects/higlass-server/on_startup.py"; \
