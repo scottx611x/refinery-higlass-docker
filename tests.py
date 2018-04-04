@@ -41,6 +41,7 @@ class CommandlineTest(unittest.TestCase):
     def test_home_page(self):
         response = requests.get(self.base_url)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("HiGlass - App", response.content)
 
     # Test if the data we specify in INPUT_JSON_URL gets ingested properly by
     # higlass server upon container startup
