@@ -92,5 +92,11 @@ if __name__ == '__main__':
 
     main()
 
-    # Start Nginx only after tilesets have been ingested
+    # Start Nginx only after all tilesets have been ingested.
+    # NOTE: The parent process will hang around, but it doesn't hurt anything
+    # at this point, and it's probably more hassle than its worth to run
+    # NGINX from this script and kill `on_startup.py` without then killing the
+    # NGINX process we just started.
+    # Its also pretty clear that our intent here is to just `run()`
+    # NGINX where any more could be confusing.
     subprocess.run(["/usr/sbin/nginx"])
