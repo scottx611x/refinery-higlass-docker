@@ -21,6 +21,11 @@ mkdir "/tmp/$CONTAINER_NAME"
 
 PYTHON_SERVER_PORT=9999
 
+# https://stackoverflow.com/a/13322667
+# Finds the correct interface and ip, based on the machine's default route.
+# Returns a url that will resolve to the SimpleHTTPServer we spin up below 
+# so that the Docker container can make requests to files existing 
+# under the cwd i.e. `./test-data/input.json`
 get_python_server_url() {
     local _ip _line
     while IFS=$': \t' read -a _line ;do
