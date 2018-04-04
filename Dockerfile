@@ -30,7 +30,7 @@ ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
 COPY on_startup.py /home/higlass/projects/higlass-server
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
-# be greater than the default of `999` so that it starts up last
+# be greater than the default of `999` so that it starts up after uwsgi processes
 RUN ( echo; \
       echo "[program:on_startup]"; \
       echo "command = python /home/higlass/projects/higlass-server/on_startup.py"; \
