@@ -45,7 +45,6 @@ class CommandlineTest(unittest.TestCase):
     # Test if the data we specify in INPUT_JSON_URL gets ingested properly by
     # higlass server upon container startup
     def test_data_ingested(self):
-        time.sleep(5)
         response = json.loads(requests.get(self.tilesets_url).content)
         self.assertEqual(response["count"], 12)
 
