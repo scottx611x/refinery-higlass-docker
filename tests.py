@@ -16,16 +16,15 @@ class CommandlineTest(unittest.TestCase):
         self.base_url = "http://localhost:{PORT}/".format(**os.environ)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
 
-        server_check_count = 0
-        while server_check_count <= 5:
-            if 0 == subprocess.call(
-                'curl --fail --silent ' + self.tilesets_url + ' > /dev/null',
-                shell=True
-            ):
+        for i in range(60):
+            try:
+                requests.get(self.tilesets_url)
                 break
-            print('still waiting for server...')
-            time.sleep(5)
-            server_check_count += 1
+            except:
+                print('Still waiting for server...')
+                time.sleep(1)
+        else:
+            self.fail('Server never came up')
 
     def assert_run(self, command, res=[r'']):
         output = subprocess.check_output(
