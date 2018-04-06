@@ -10,7 +10,7 @@
 - python
 
 ### Running the Container:
-- `pip install -r requirements.txt`
+- `pip install -r requirements.txt -r requirements-test.txt`
 - `./test_runner.sh`
 
 If the tests pass you'll be provided with some info about the currently running container:

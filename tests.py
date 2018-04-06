@@ -83,10 +83,3 @@ class StartupScriptTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    lines = [
-        'browse:  http://localhost:{PORT}/',
-        'shell:   docker exec --interactive --tty container-{STAMP}{SUFFIX} bash',
-        'logs:    docker exec container-{STAMP}{SUFFIX} ./logs.sh'
-    ]
-    for line in lines:
-        print(line.format(**os.environ))

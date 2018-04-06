@@ -2,10 +2,9 @@
 sudo: required
 
 install:
-  - sudo pip install -r requirements.txt # for latest.py
-
+  - pip install -r requirements.txt -r requirements-test.txt
 script:
-  - sudo ./test_runner.sh
+  - ./test_runner.sh
 
 after_success:
   - codecov
