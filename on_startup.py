@@ -9,13 +9,9 @@ from requests.exceptions import RequestException
 from django.core.management import call_command
 
 DATA_DIRECTORY = "/refinery-data/"
-DATA_TYPE = "data_type"
 FILE_URL = "file_url"
 FILE_NAME = "file_name"
 FILE_PATH = "file_path"
-FILE_TYPE = "file_type"
-HIGLASS_DATA_TYPE = "higlass_data_type_Characteristics_generic_s"
-HIGLASS_FILE_TYPE = "higlass_file_type_Characteristics_generic_s"
 NODE_INFO = "node_info"
 NODE_SOLR_INFO = "node_solr_info"
 
@@ -26,8 +22,8 @@ class Tileset(object):
         self.file_url = refinery_node[FILE_URL]
         self.file_name = refinery_node[FILE_URL].split("/")[-1]
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
-        self.file_type = refinery_node[NODE_SOLR_INFO][HIGLASS_FILE_TYPE]
-        self.data_type = refinery_node[NODE_SOLR_INFO][HIGLASS_DATA_TYPE]
+        self.file_type = "cooler"
+        self.data_type = "matrix"
 
     def download(self):
         """
