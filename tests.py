@@ -82,4 +82,15 @@ class StartupScriptTests(unittest.TestCase):
             self.assertTrue(call_command_mock.called)
 
 if __name__ == '__main__':
-    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(CommandlineTest)
+    suite.addTests(
+        unittest.TestLoader().loadTestsFromTestCase(StartupScriptTests))
+    unittest.TextTestRunner(verbosity=2).run(suite)
+
+    lines = [
+        'browse:  http://localhost:{PORT}/',
+        'shell:   docker exec --interactive --tty container-{STAMP}{SUFFIX} bash',
+        'logs:    docker exec container-{STAMP}{SUFFIX} ./logs.sh'
+    ]
+    for line in lines:
+        print(line.format(**os.environ))

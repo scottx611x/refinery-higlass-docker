@@ -48,10 +48,6 @@ docker run --env INPUT_JSON_URL=$(get_python_server_url)/test-data/input.json \
 
 coverage run tests.py
 
-echo browse:  http://localhost:$PORT/
-echo shell: docker exec --interactive --tty container-$STAMP$SUFFIX bash
-echo logs:  docker exec container-$STAMP$SUFFIX ./logs.sh
-
 kill $PYTHON_SERVER_PID
 
 rm -r "/tmp/$CONTAINER_NAME"
