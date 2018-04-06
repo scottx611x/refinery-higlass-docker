@@ -19,7 +19,7 @@ class CommandlineTest(unittest.TestCase):
         self.base_url = "http://localhost:{PORT}/".format(**os.environ)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
 
-        for i in range(60):  # a minute is probably gratuitous
+        for i in range(30):
             try:
                 requests.get(self.tilesets_url)
                 break
@@ -50,7 +50,7 @@ class CommandlineTest(unittest.TestCase):
     # higlass server upon container startup
     def test_data_ingested(self):
         response = json.loads(requests.get(self.tilesets_url).content)
-        self.assertEqual(response["count"], 12)
+        self.assertEqual(response["count"], 4)
 
 
 if __name__ == '__main__':
