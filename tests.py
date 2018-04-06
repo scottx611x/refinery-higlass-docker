@@ -1,12 +1,12 @@
 import json
+import mock
 import os
 import requests
 import subprocess
-import sys
 import time
 import unittest
 
-PYTHON_TEST_SERVER_PID = sys.argv[1]
+from on_startup import DATA_DIRECTORY, Tileset
 
 
 class CommandlineTest(unittest.TestCase):
@@ -53,9 +53,36 @@ class CommandlineTest(unittest.TestCase):
         self.assertEqual(response["count"], 4)
 
 
+class StartupScriptTests(unittest.TestCase):
+
+    def setUp(self):
+        self.test_file_name = "test.multires.cool"
+        self.file_url = "http://www.example.com/{}".format(self.test_file_name)
+        refinery_node = {"file_url": self.file_url}
+        self.tileset = Tileset(refinery_node)
+
+    def test_tileset_instantiation(self):
+        self.assertEqual(self.tileset.file_url, self.file_url)
+        self.assertEqual(self.tileset.file_name, self.test_file_name)
+        self.assertEqual(
+            self.tileset.file_path,
+            DATA_DIRECTORY +
+            self.test_file_name)
+        self.assertEqual(self.tileset.file_type, "cooler")
+        self.assertEqual(self.tileset.data_type, "matrix")
+
+    def test_tileset_download(self):
+        with mock.patch("on_startup.Tileset._write_file_to_disk") as write_file_mock:
+            self.tileset.download()
+            self.assertTrue(write_file_mock.called)
+
+    def test_tileset_ingest(self):
+        with mock.patch("on_startup.call_command") as call_command_mock:
+            self.tileset.ingest()
+            self.assertTrue(call_command_mock.called)
+
 if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromTestCase(CommandlineTest)
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
+    unittest.main()
     lines = [
         'browse:  http://localhost:{PORT}/',
         'shell:   docker exec --interactive --tty container-{STAMP}{SUFFIX} bash',
@@ -63,12 +90,3 @@ if __name__ == '__main__':
     ]
     for line in lines:
         print(line.format(**os.environ))
-
-    # Kill PYTHON_TEST_SERVER
-    subprocess.call(["kill", PYTHON_TEST_SERVER_PID])
-
-    if result.wasSuccessful():
-        print('PASS!')
-    else:
-        print('FAIL!')
-        exit(1)

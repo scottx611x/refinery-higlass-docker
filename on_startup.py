@@ -40,12 +40,7 @@ class Tileset(object):
                 )
             )
 
-        with open(self.file_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=1024):
-                # filter out KEEP-ALIVE new chunks
-                if chunk:
-                    f.write(chunk)
-
+        self._write_file_to_disk(response)
         response.close()
 
     def ingest(self):
@@ -60,6 +55,13 @@ class Tileset(object):
             filetype=self.file_type,
             datatype=self.data_type
         )
+
+    def _write_file_to_disk(self, response):
+        with open(self.file_path, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=1024):
+                # filter out KEEP-ALIVE new chunks
+                if chunk:
+                    f.write(chunk)
 
 
 def get_refinery_input():
