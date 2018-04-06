@@ -8,6 +8,7 @@ script:
   - sudo ./test_runner.sh
 
 after_success:
+  - codecov
   - REPO=scottx611x/refinery-higlass-docker
   - IMAGE=`sudo docker ps --latest --format '{{ .Image }}'` # TODO: with more containers, can't rely on ordering
   - tag_push() { echo "Tagging into $2"; sudo docker tag $1 $2; sudo docker push $2; }
@@ -29,4 +30,3 @@ after_success:
         tag_push $IMAGE $REPO:$TRAVIS_TAG;
         tag_push $IMAGE $REPO:latest;
       fi
-
