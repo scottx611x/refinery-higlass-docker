@@ -25,9 +25,10 @@ RUN sed -i 's@"\.\.\/@"\.\/@g' \
 # Higlass currently has no favicon.png causing a 500 Error
 RUN touch higlass-website/assets/images/favicon.png
 
-ENV DJANGO_SETTINGS_MODULE="higlass_server.settings"
 
 COPY on_startup.py /home/higlass/projects/higlass-server
+COPY refinery-settings.py /home/higlass/projects/higlass-server/higlass_server
+ENV DJANGO_SETTINGS_MODULE="higlass_server.refinery-settings"
 
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
 # be greater than the default of `999` so that it starts up after uwsgi processes. 
