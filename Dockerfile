@@ -1,4 +1,4 @@
-FROM gehlenborglab/higlass:v0.2.61
+FROM gehlenborglab/higlass:v0.2.62
 
 # Swap the "app" html with the main html to always provide the /app/ view
 RUN cp /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
