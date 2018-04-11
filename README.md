@@ -15,13 +15,12 @@
 
 If the tests pass you'll be provided with some info about the currently running container:
 ```
-Ran 3 tests in 37.126s
+Ran 6 tests in 25.254s
 
 OK
-browse:  http://localhost:32921/
-shell:   docker exec --interactive --tty container-2018-04-03_10-11-28-standalone bash
-logs:    docker exec container-2018-04-03_10-11-28-standalone ./logs.sh
-PASS!
+browse:  http://localhost:32775/
+shell:   docker exec --interactive --tty container-2018-04-11_10-09-07-standalone bash
+logs:    docker exec container-2018-04-11_10-09-07-standalone ./logs.sh
 ```
 
 
