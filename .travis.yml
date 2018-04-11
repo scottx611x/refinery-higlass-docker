@@ -29,3 +29,10 @@ after_success:
         tag_push $IMAGE $REPO:$TRAVIS_TAG;
         tag_push $IMAGE $REPO:latest;
       fi
+
+notifications:
+ email:
+    recipients:
+      - Scott_Ouellette@hms.harvard.edu
+    on_success: never
+    on_failure: always
