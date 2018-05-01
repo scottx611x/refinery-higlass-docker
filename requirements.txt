@@ -1,5 +1,6 @@
 codecov==2.0.15
 coverage==4.5.1
-requests==2.17.3
-Django
-mock
+requests==2.12.3
+Django==2.0.4
+mock==2.0.0
+docker==3.2.1
