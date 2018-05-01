@@ -26,7 +26,7 @@ class CommandlineTest(unittest.TestCase):
             try:
                 requests.get(self.tilesets_url)
                 break
-            except Exception as e:
+            except Exception:
                 print('Still waiting for server...')
                 time.sleep(1)
         else:
