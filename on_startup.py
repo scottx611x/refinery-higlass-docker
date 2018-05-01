@@ -58,12 +58,16 @@ class Tileset(object):
         management command
         :param tileset_dict: dict containing information about a tileset
         """
-        call_command(
-            "ingest_tileset",
-            filename=self.file_path,
-            filetype=self.file_type,
-            datatype=self.data_type
-        )
+        try:
+            call_command(
+                "ingest_tileset",
+                filename=self.file_path,
+                filetype=self.file_type,
+                datatype=self.data_type
+            )
+        except django.db.utils.IntegrityError as e:
+            logger.error(e)
+
         logger.info("Tileset: %s ingested", self)
 
     def _write_file_to_disk(self, response):
