@@ -73,11 +73,6 @@ class StartupScriptTests(unittest.TestCase):
     def tearDown(self):
         mock.patch.stopall()
 
-        for tileset in [self.cooler_tileset.file_path,
-                        self.bigwig_tileset.file_path]:
-            if os.path.exists(tileset):
-                os.remove(tileset)
-
     def test_tileset_type_meta_info_is_set_cooler(self):
         self.assertEqual(self.cooler_tileset.file_type, "cooler")
         self.assertEqual(self.cooler_tileset.data_type, "matrix")
