@@ -30,6 +30,9 @@ COPY on_startup.py /home/higlass/projects/higlass-server
 COPY refinery-settings.py /home/higlass/projects/higlass-server/higlass_server
 ENV DJANGO_SETTINGS_MODULE="higlass_server.refinery-settings"
 
+# This version can utilize pybigwig.open as a context manager
+RUN pip install pyBigWig==0.3.11
+
 # Append to the supervisord.conf and set the priority of `on_startup.py` to
 # be greater than the default of `999` so that it starts up after uwsgi processes. 
 # Running the `ingest_tileset` Django management command requires things like db migrations to have been applied, 
