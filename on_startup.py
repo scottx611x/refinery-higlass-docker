@@ -4,10 +4,10 @@ import requests
 import subprocess
 
 import django
-
-from requests.exceptions import RequestException
+import pyBigWig
 
 from django.core.management import call_command
+from requests.exceptions import RequestException
 
 DATA_DIRECTORY = "/refinery-data/"
 FILE_URL = "file_url"
