@@ -19,19 +19,31 @@ NODE_SOLR_INFO = "node_solr_info"
 logger = logging.getLogger(__name__)
 
 class Tileset(object):
+    file_type = None
+    data_type = None
 
     def __init__(self, refinery_node):
         self.file_url = refinery_node[FILE_URL]
         self.file_name = refinery_node[FILE_URL].split("/")[-1]
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
-        self.file_type = "cooler"
-        self.data_type = "matrix"
+        self._set_tileset_type_meta()
         logger.info("Tileset: %s created", self)
 
     def download(self):
     def __repr__(self):
         args = [self.file_path, self.file_type, self.data_type]
         return "Tileset: {} {} {}".format(*args)
+
+    def _set_tileset_type_meta(self):
+        """Set the file_type and Datatype information for the file underneath self.file_path"""
+        self._download()
+
+        if self.is_bigwig():
+            self.file_type = "bigwig"
+            self.data_type = "vector"
+        else:
+            self.file_type = "cooler"
+            self.data_type = "matrix"
 
         logger.debug("Tileset type meta: %s %s",
                      self.file_type, self.data_type)
