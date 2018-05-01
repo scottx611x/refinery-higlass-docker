@@ -29,7 +29,6 @@ class Tileset(object):
         self._set_tileset_type_meta()
         logger.info("Tileset: %s created", self)
 
-    def download(self):
     def __repr__(self):
         args = [self.file_path, self.file_type, self.data_type]
         return "Tileset: {} {} {}".format(*args)
@@ -54,6 +53,8 @@ class Tileset(object):
                 return bw.isBigWig()
         except RuntimeError:
             return False
+
+    def _download(self):
         """
         Download a tileset from a `file_url` to disk at a `file_path`
         """
