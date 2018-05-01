@@ -1,3 +1,4 @@
+import logging
 import os
 import requests
 import subprocess
@@ -15,6 +16,7 @@ FILE_PATH = "file_path"
 NODE_INFO = "node_info"
 NODE_SOLR_INFO = "node_solr_info"
 
+logger = logging.getLogger(__name__)
 
 class Tileset(object):
 
@@ -24,8 +26,11 @@ class Tileset(object):
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
         self.file_type = "cooler"
         self.data_type = "matrix"
+        logger.info("Tileset: %s created", self)
 
     def download(self):
+        logger.debug("Tileset type meta: %s %s",
+                     self.file_type, self.data_type)
         """
         Download a tileset from a `file_url` to disk at a `file_path`
         """
@@ -55,6 +60,7 @@ class Tileset(object):
             filetype=self.file_type,
             datatype=self.data_type
         )
+        logger.info("Tileset: %s ingested", self)
 
     def _write_file_to_disk(self, response):
         with open(self.file_path, 'wb') as f:
@@ -76,6 +82,7 @@ def main():
     Tileset objects
     """
     config_data = get_refinery_input()
+    logger.debug("Refinery input json: %s", config_data)
 
     for refinery_node_uuid in config_data[NODE_INFO]:
         refinery_node = config_data[NODE_INFO][refinery_node_uuid]
@@ -86,6 +93,7 @@ def main():
 
 if __name__ == '__main__':
     # Allows for django commands to run in a standalone script
+    logger.info("Running Django setup")
     django.setup()
 
     main()
@@ -97,4 +105,5 @@ if __name__ == '__main__':
     # NGINX process we just started.
     # Its also pretty clear that our intent here is to just `run()`
     # NGINX where any more could be confusing.
+    logger.info("Starting Nginx")
     subprocess.run(["/usr/sbin/nginx"])
