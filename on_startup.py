@@ -49,10 +49,15 @@ class Tileset(object):
 
     def is_bigwig(self):
         try:
-            with pyBigWig.open(self.file_path) as bw:
-                return bw.isBigWig()
-        except RuntimeError:
+            bw = pyBigWig.open(self.file_path)
+        except RuntimeError: # File isn't a bigwig
             return False
+        else:
+            is_bigwig = bw.isBigWig()
+            bw.close()
+            return is_bigwig
+
+
 
     def _download(self):
         """
