@@ -22,7 +22,7 @@ class CommandlineTest(unittest.TestCase):
         port = client.port(os.environ["CONTAINER_NAME"], 80)[0]["HostPort"]
         self.base_url = "http://localhost:{}/".format(port)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
-        for i in range(30):
+        for i in range(60): # probably overkill, but Travis is slow sometimes
             try:
                 requests.get(self.tilesets_url)
                 break
