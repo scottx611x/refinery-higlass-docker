@@ -18,6 +18,7 @@ NODE_SOLR_INFO = "node_solr_info"
 
 logger = logging.getLogger(__name__)
 
+
 class Tileset(object):
     file_type = None
     data_type = None
@@ -34,7 +35,10 @@ class Tileset(object):
         return "Tileset: {} {} {}".format(*args)
 
     def _set_tileset_type_meta(self):
-        """Set the file_type and Datatype information for the file underneath self.file_path"""
+        """
+        Set the file_type and Datatype information
+        for the file underneath self.file_path
+        """
         self._download()
 
         if self.is_bigwig():
@@ -50,14 +54,12 @@ class Tileset(object):
     def is_bigwig(self):
         try:
             bw = pyBigWig.open(self.file_path)
-        except RuntimeError: # File isn't a bigwig
+        except RuntimeError:  # File isn't a bigwig
             return False
         else:
             is_bigwig = bw.isBigWig()
             bw.close()
             return is_bigwig
-
-
 
     def _download(self):
         """
