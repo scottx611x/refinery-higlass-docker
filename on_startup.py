@@ -47,6 +47,13 @@ class Tileset(object):
 
         logger.debug("Tileset type meta: %s %s",
                      self.file_type, self.data_type)
+
+    def is_bigwig(self):
+        try:
+            with pyBigWig.open(self.file_path) as bw:
+                return bw.isBigWig()
+        except RuntimeError:
+            return False
         """
         Download a tileset from a `file_url` to disk at a `file_path`
         """
