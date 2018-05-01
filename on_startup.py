@@ -114,10 +114,7 @@ def main():
 
     for refinery_node_uuid in config_data[NODE_INFO]:
         refinery_node = config_data[NODE_INFO][refinery_node_uuid]
-        tileset = Tileset(refinery_node)
-        tileset.download()
-        tileset.ingest()
-
+        Tileset(refinery_node).ingest()
 
 if __name__ == '__main__':
     # Allows for django commands to run in a standalone script
