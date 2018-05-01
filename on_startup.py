@@ -29,6 +29,10 @@ class Tileset(object):
         logger.info("Tileset: %s created", self)
 
     def download(self):
+    def __repr__(self):
+        args = [self.file_path, self.file_type, self.data_type]
+        return "Tileset: {} {} {}".format(*args)
+
         logger.debug("Tileset type meta: %s %s",
                      self.file_type, self.data_type)
         """
