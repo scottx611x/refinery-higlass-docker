@@ -131,8 +131,9 @@ def main():
         refinery_node = config_data[NODE_INFO][refinery_node_uuid]
         Tileset(refinery_node).ingest()
 
-def init():
-    if __name__ == '__main__':
-        main()
-        _start_nginx()  # Start Nginx after all tilesets have been ingested
-init()
+    _start_nginx()  # Start Nginx after all tilesets have been ingested
+
+
+if __name__ == '__main__':
+    main()
+

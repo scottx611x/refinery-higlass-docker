@@ -140,11 +140,10 @@ class StartupScriptTests(unittest.TestCase):
             test_container_runner.test_fixture_server.ip,
             test_container_runner.test_fixture_server.port
         )
-        with mock.patch.object(on_startup, "__name__", "__main__"):
-            on_startup.init()
-            self.assertTrue(django_setup_mock.called)
-            self.assertTrue(start_nginx_mock.called)
-            self.assertEqual(call_command_mock.call_count, 5)
+        on_startup.main()
+        self.assertTrue(django_setup_mock.called)
+        self.assertTrue(start_nginx_mock.called)
+        self.assertEqual(call_command_mock.call_count, 5)
 
 if __name__ == '__main__':
     test_container_runner = TestContainerRunner()
