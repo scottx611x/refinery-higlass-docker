@@ -68,6 +68,7 @@ class TestContainerRunner(object):
     def __exit__(self, *args):
         if not os.environ.get("CONTINUOUS_INTEGRATION"):
             self.docker_cleanup()
+            shutil.rmtree(self.outer_volume_path)
 
     def _pull_image(self):
         print("Pulling image: {}".format(self.image_name))
