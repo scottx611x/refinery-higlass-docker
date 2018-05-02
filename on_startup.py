@@ -1,4 +1,3 @@
-import logging
 import os
 import requests
 import subprocess
@@ -16,9 +15,6 @@ FILE_PATH = "file_path"
 NODE_INFO = "node_info"
 NODE_SOLR_INFO = "node_solr_info"
 
-logger = logging.getLogger(__name__)
-
-
 class Tileset(object):
     file_type = None
     data_type = None
@@ -28,7 +24,6 @@ class Tileset(object):
         self.file_name = refinery_node[FILE_URL].split("/")[-1]
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
         self._set_tileset_type_meta()
-        logger.info("Tileset: %s created", self)
 
     def __repr__(self):
         args = [self.file_path, self.file_type, self.data_type]
@@ -48,8 +43,8 @@ class Tileset(object):
             self.file_type = "cooler"
             self.data_type = "matrix"
 
-        logger.debug("Tileset type meta: %s %s",
-                     self.file_type, self.data_type)
+        print("Tileset type meta: %s %s",
+              self.file_type, self.data_type)
 
     def is_bigwig(self):
         try:
@@ -93,9 +88,13 @@ class Tileset(object):
                 datatype=self.data_type
             )
         except django.db.utils.IntegrityError as e:
-            logger.error(e)
-
-        logger.info("Tileset: %s ingested", self)
+            # TODO: higlass-server code has migration issues. 
+            # I'm unable to run `makemigrations` which I believe is partly 
+            # causing the integrity error here. 
+            # (TileSet.owner is expected to be NOT NULL, although 
+            # tilesets.models.TileSet.owner has blank=True, null=True)
+            # Nevertheless we are still able to create the TileSet objects as necessary
+            print(e)
 
     def _write_file_to_disk(self, response):
         with open(self.file_path, 'wb') as f:
@@ -109,27 +108,7 @@ def get_refinery_input():
     """ Make a GET request to acquire the input data for the container"""
     return requests.get(os.environ["INPUT_JSON_URL"]).json()
 
-
-def main():
-    """
-    Download remote files specified by urls in the data provided by a GET to
-    the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
-    Tileset objects
-    """
-    config_data = get_refinery_input()
-    logger.debug("Refinery input json: %s", config_data)
-
-    for refinery_node_uuid in config_data[NODE_INFO]:
-        refinery_node = config_data[NODE_INFO][refinery_node_uuid]
-        Tileset(refinery_node).ingest()
-
-if __name__ == '__main__':
-    # Allows for django commands to run in a standalone script
-    logger.info("Running Django setup")
-    django.setup()
-
-    main()
-
+def _start_nginx():
     # Start Nginx only after all tilesets have been ingested.
     # NOTE: The parent process will hang around, but it doesn't hurt anything
     # at this point, and it's probably more hassle than its worth to run
@@ -137,5 +116,26 @@ if __name__ == '__main__':
     # NGINX process we just started.
     # Its also pretty clear that our intent here is to just `run()`
     # NGINX where any more could be confusing.
-    logger.info("Starting Nginx")
     subprocess.run(["/usr/sbin/nginx"])
+
+def main():
+    """
+    Download remote files specified by urls in the data provided by a GET to
+    the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
+    Tileset objects
+    """
+    django.setup() # Allow django commands to be run (Ex: `ingest_tileset`)
+
+    config_data = get_refinery_input()
+
+    for refinery_node_uuid in config_data[NODE_INFO]:
+        refinery_node = config_data[NODE_INFO][refinery_node_uuid]
+        Tileset(refinery_node).ingest()
+
+
+def init():
+    if __name__ == '__main__':
+       
+        main()
+        _start_nginx()
+init()
