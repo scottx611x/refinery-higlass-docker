@@ -36,7 +36,7 @@ class ContainerIntegrationTests(unittest.TestCase):
             shell=True
         ).strip()
         for re in res:
-            self.assertRegexpMatches(str(output), re)
+            self.assertRegexpMatches(output.decode('utf-8'), re)
 
     def test_home_page(self):
         response = requests.get(self.base_url)
