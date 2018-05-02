@@ -1,6 +1,8 @@
 import _thread
+import datetime
 import docker
 import os
+import shutil
 import socket
 import sys
 
@@ -36,18 +38,25 @@ class TestFixtureServer(object):
 
 
 class TestContainerRunner(object):
+    def __init__(self, repository="scottx611x/refinery-higlass-docker"):
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-    def __init__(self):
         self.client = docker.from_env()
-        self.container_name = os.environ["CONTAINER_NAME"]
-        self.image_name = "image-" + os.environ["STAMP"]
-        self.repository = os.environ["REPO"]
+        self.low_level_client = docker.APIClient(base_url='unix://var/run/docker.sock')
+
+        self.container_name = "container-" + timestamp
+        self.container_port = None
+        self.image_name = "image-" + timestamp
+        self.repository = repository
         self.containers = []
 
         self.test_fixture_server = TestFixtureServer()
         self.test_fixture_server.start_server_in_background()
 
         self.outer_volume_path = "/tmp/" + self.container_name
+        if not os.path.exists(self.outer_volume_path):
+            os.makedirs(self.outer_volume_path)
+
         self.inner_volume_path = "/refinery-data"
 
         self._pull_image()
