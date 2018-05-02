@@ -18,10 +18,9 @@ NODE_SOLR_INFO = "node_solr_info"
 
 
 class Tileset(object):
-    file_type = None
-    data_type = None
-
     def __init__(self, refinery_node):
+        self.file_type = None
+        self.data_type = None
         self.file_url = refinery_node[FILE_URL]
         self.file_name = refinery_node[FILE_URL].split("/")[-1]
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
