@@ -8,4 +8,4 @@ export CONTAINER_NAME="container-$STAMP$SUFFIX"
 
 mkdir "/tmp/$CONTAINER_NAME"
 coverage run tests.py
-rm -r "/tmp/$CONTAINER_NAME"
+rm -rf "/tmp/$CONTAINER_NAME"
