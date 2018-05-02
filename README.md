@@ -18,5 +18,4 @@ Ran 9 tests in 47.260s
 
 OK
 Cleaning up TestContainerRunner containers...
-[<Container: d6a1e50cbb>]
 ```
