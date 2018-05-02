@@ -28,7 +28,7 @@ class ContainerIntegrationTests(unittest.TestCase):
                 requests.get(self.tilesets_url)
                 break
             except Exception:
-                print('Still waiting for server...')
+                print('Still waiting for server...', file=sys.stdout)
                 time.sleep(1)
         else:
             self.fail('Server never came up')

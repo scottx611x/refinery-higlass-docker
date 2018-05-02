@@ -1,6 +1,7 @@
 import os
 import requests
 import subprocess
+import sys
 
 import django
 import pyBigWig
@@ -14,6 +15,7 @@ FILE_NAME = "file_name"
 FILE_PATH = "file_path"
 NODE_INFO = "node_info"
 NODE_SOLR_INFO = "node_solr_info"
+
 
 class Tileset(object):
     file_type = None
@@ -31,7 +33,7 @@ class Tileset(object):
 
     def _set_tileset_type_meta(self):
         """
-        Set the file_type and Datatype information
+        Set the file_type and data_type information
         for the file underneath self.file_path
         """
         self._download()
@@ -43,10 +45,7 @@ class Tileset(object):
             self.file_type = "cooler"
             self.data_type = "matrix"
 
-        print("Tileset type meta: %s %s",
-              self.file_type, self.data_type)
-
-    def is_bigwig(self):
+    def is_bigwig(self):      
         try:
             bw = pyBigWig.open(self.file_path)
         except RuntimeError:  # File isn't a bigwig
@@ -78,7 +77,6 @@ class Tileset(object):
         """
         Ingest previously downloaded files into higlass-server w/ django
         management command
-        :param tileset_dict: dict containing information about a tileset
         """
         try:
             call_command(
@@ -88,13 +86,14 @@ class Tileset(object):
                 datatype=self.data_type
             )
         except django.db.utils.IntegrityError as e:
-            # TODO: higlass-server code has migration issues. 
-            # I'm unable to run `makemigrations` which I believe is partly 
-            # causing the integrity error here. 
-            # (TileSet.owner is expected to be NOT NULL, although 
+            # TODO: higlass-server code has migration issues.
+            # I'm unable to run `makemigrations` which I believe is partly
+            # causing the integrity error here.
+            # (TileSet.owner is expected to be NOT NULL, although
             # tilesets.models.TileSet.owner has blank=True, null=True)
-            # Nevertheless we are still able to create the TileSet objects as necessary
-            print(e)
+            # Nevertheless we are still able to create the TileSet objects as
+            # necessary
+            print(e, file=sys.stderr)
 
     def _write_file_to_disk(self, response):
         with open(self.file_path, 'wb') as f:
@@ -108,8 +107,8 @@ def get_refinery_input():
     """ Make a GET request to acquire the input data for the container"""
     return requests.get(os.environ["INPUT_JSON_URL"]).json()
 
+
 def _start_nginx():
-    # Start Nginx only after all tilesets have been ingested.
     # NOTE: The parent process will hang around, but it doesn't hurt anything
     # at this point, and it's probably more hassle than its worth to run
     # NGINX from this script and kill `on_startup.py` without then killing the
@@ -118,13 +117,14 @@ def _start_nginx():
     # NGINX where any more could be confusing.
     subprocess.run(["/usr/sbin/nginx"])
 
+
 def main():
     """
     Download remote files specified by urls in the data provided by a GET to
     the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
     Tileset objects
     """
-    django.setup() # Allow django commands to be run (Ex: `ingest_tileset`)
+    django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
 
     config_data = get_refinery_input()
 
@@ -132,10 +132,8 @@ def main():
         refinery_node = config_data[NODE_INFO][refinery_node_uuid]
         Tileset(refinery_node).ingest()
 
-
 def init():
     if __name__ == '__main__':
-       
         main()
-        _start_nginx()
+        _start_nginx()  # Start Nginx after all tilesets have been ingested
 init()

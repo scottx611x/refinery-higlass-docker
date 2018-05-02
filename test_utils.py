@@ -1,8 +1,8 @@
 import _thread
 import docker
-import logging
 import os
 import socket
+import sys
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
@@ -26,7 +26,11 @@ class TestFixtureServer(object):
         server.serve_forever()
 
     def start_server_in_background(self):
-        print("Starting Test Fixture Server on: http://{}:{}".format(self.ip, self.port))
+        print(
+            "Starting Test Fixture Server on: http://{}:{}".format(
+                self.ip, self.port
+            ), file=sys.stdout
+        )
         # start the server in a background thread
         _thread.start_new_thread(self._start_server, ())
 
@@ -54,10 +58,10 @@ class TestContainerRunner(object):
 
     def __exit__(self, *args):
         if not os.environ.get("CONTINUOUS_INTEGRATION"):
-            self.cleanup_containers()
+            self.docker_cleanup()
 
     def _pull_image(self):
-        print("Pulling image: {}".format(self.image_name))
+        print("Pulling image: {}".format(self.image_name), file=sys.stdout)
         self.client.images.pull(self.repository)
 
     def _build_image(self):
@@ -71,7 +75,8 @@ class TestContainerRunner(object):
         )
 
     def run(self):
-        print("Creating container: {}".format(self.container_name))
+        print("Creating container: {}".format(self.container_name), 
+              file=sys.stdout)
         container = self.client.containers.run(
             self.image_name,
             detach=True,
@@ -94,8 +99,9 @@ class TestContainerRunner(object):
         )
         self.containers.append(container)
 
-    def cleanup_containers(self):
-        print("Cleaning up TestContainerRunner containers...")
-        print(self.containers)
+    def docker_cleanup(self):
+        print("Cleaning up TestContainerRunner containers/images...", 
+              file=sys.stdout)
         for container in self.containers:
             container.remove(force=True, v=True)
+        self.client.images.remove(self.image_name)
