@@ -24,7 +24,8 @@ class Tileset(object):
         self.file_url = refinery_node[FILE_URL]
         self.file_name = refinery_node[FILE_URL].split("/")[-1]
         self.file_path = '{}{}'.format(DATA_DIRECTORY, self.file_name)
-        self._set_tileset_type_meta()
+
+        self.download()
 
     def __repr__(self):
         args = [self.file_path, self.file_type, self.data_type]
@@ -35,8 +36,6 @@ class Tileset(object):
         Set the file_type and data_type information
         for the file underneath self.file_path
         """
-        self._download()
-
         if self.is_bigwig():
             self.file_type = "bigwig"
             self.data_type = "vector"
@@ -54,7 +53,7 @@ class Tileset(object):
             bw.close()
             return is_bigwig
 
-    def _download(self):
+    def download(self):
         """
         Download a tileset from a `file_url` to disk at a `file_path`
         """
@@ -92,7 +91,7 @@ class Tileset(object):
             # tilesets.models.TileSet.owner has blank=True, null=True)
             # Nevertheless we are still able to create the TileSet objects as
             # necessary
-            print(e, file=sys.stderr)
+            print(e)
 
     def _write_file_to_disk(self, response):
         with open(self.file_path, 'wb') as f:
@@ -100,6 +99,7 @@ class Tileset(object):
                 # filter out KEEP-ALIVE new chunks
                 if chunk:
                     f.write(chunk)
+        self._set_tileset_type_meta()
 
 
 def get_refinery_input():
