@@ -31,7 +31,7 @@ class TestFixtureServer(object):
         print(
             "Starting Test Fixture Server on: http://{}:{}".format(
                 self.ip, self.port
-            ), file=sys.stdout
+            )
         )
         # start the server in a background thread
         _thread.start_new_thread(self._start_server, ())
@@ -70,11 +70,11 @@ class TestContainerRunner(object):
             self.docker_cleanup()
 
     def _pull_image(self):
-        print("Pulling image: {}".format(self.image_name), file=sys.stdout)
+        print("Pulling image: {}".format(self.image_name))
         self.client.images.pull(self.repository)
 
     def _build_image(self):
-        print("Building image: {}".format(self.image_name), file=sys.stdout)
+        print("Building image: {}".format(self.image_name))
         self.client.images.build(
             path=".",
             tag=self.image_name,
@@ -84,8 +84,7 @@ class TestContainerRunner(object):
         )
 
     def run(self):
-        print("Creating container: {}".format(self.container_name), 
-              file=sys.stdout)
+        print("Creating container: {}".format(self.container_name))
         container = self.client.containers.run(
             self.image_name,
             detach=True,
@@ -115,8 +114,7 @@ class TestContainerRunner(object):
         )[0]["HostPort"]
 
     def docker_cleanup(self):
-        print("Cleaning up TestContainerRunner containers/images...", 
-              file=sys.stdout)
+        print("Cleaning up TestContainerRunner containers/images...")
         for container in self.containers:
             container.remove(force=True, v=True)
         self.client.images.remove(self.image_name)
