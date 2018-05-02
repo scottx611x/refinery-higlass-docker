@@ -11,7 +11,8 @@
 
 ### Running tests:
 - `pip install -r requirements-test.txt`
-- `python tests.py` or with coverage: `coverage run tests.py`
+- `python tests.py` 
+- With coverage: `coverage run tests.py`
 
 ```
 Ran 9 tests in 47.260s
