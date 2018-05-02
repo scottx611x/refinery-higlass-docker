@@ -4,6 +4,7 @@ import mock
 import os
 import requests
 import subprocess
+import sys
 import time
 import unittest
 
@@ -15,14 +16,14 @@ from test_utils import TestContainerRunner
 logger = logging.getLogger(__name__)
 
 
-class CommandlineTest(unittest.TestCase):
+class ContainerIntegrationTests(unittest.TestCase):
 
     def setUp(self):
         client = docker.APIClient(base_url='unix://var/run/docker.sock')
         port = client.port(os.environ["CONTAINER_NAME"], 80)[0]["HostPort"]
         self.base_url = "http://localhost:{}/".format(port)
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
-        for i in range(60): # probably overkill, but Travis is slow sometimes
+        for i in range(60):  # probably overkill, but Travis is slow sometimes
             try:
                 requests.get(self.tilesets_url)
                 break
@@ -60,12 +61,13 @@ class StartupScriptTests(unittest.TestCase):
         with open("test-data/input.json") as f:
             input_dict = json.loads(f.read())
             self.cooler_file_url = input_dict["file_relationships"][0]
-            self.big_wig_file_url = input_dict["file_relationships"][3]
+            self.bigwig_file_url = input_dict["file_relationships"][3]
 
-        self.test_file_name = self.cooler_file_url.split("/")[-1]
+        self.cooler_file_name = self.cooler_file_url.split("/")[-1]
+        self.bigwig_file_name = self.bigwig_file_url.split("/")[-1]
 
         refinery_cooler_node = {"file_url": self.cooler_file_url}
-        refinery_bigwig_node = {"file_url": self.big_wig_file_url}
+        refinery_bigwig_node = {"file_url": self.bigwig_file_url}
 
         self.cooler_tileset = on_startup.Tileset(refinery_cooler_node)
         self.bigwig_tileset = on_startup.Tileset(refinery_bigwig_node)
@@ -73,24 +75,30 @@ class StartupScriptTests(unittest.TestCase):
     def tearDown(self):
         mock.patch.stopall()
 
-    def test_tileset_type_meta_info_is_set_cooler(self):
+    def test_tileset_type_meta_info_is_set(self):
         self.assertEqual(self.cooler_tileset.file_type, "cooler")
         self.assertEqual(self.cooler_tileset.data_type, "matrix")
+
+        self.assertEqual(self.bigwig_tileset.file_type, "bigwig")
+        self.assertEqual(self.bigwig_tileset.data_type, "vector")
 
     def test_tileset_is_bigwig(self):
         self.assertFalse(self.cooler_tileset.is_bigwig())
         self.assertTrue(self.bigwig_tileset.is_bigwig())
 
-    def test_tileset_type_meta_info_is_set_bigwig(self):
-        self.assertEqual(self.bigwig_tileset.file_type, "bigwig")
-        self.assertEqual(self.bigwig_tileset.data_type, "vector")
-
     def test_tileset_instantiation(self):
         self.assertEqual(self.cooler_tileset.file_url, self.cooler_file_url)
-        self.assertEqual(self.cooler_tileset.file_name, self.test_file_name)
+        self.assertEqual(self.cooler_tileset.file_name, self.cooler_file_name)
         self.assertEqual(
             self.cooler_tileset.file_path,
-            on_startup.DATA_DIRECTORY + self.test_file_name
+            on_startup.DATA_DIRECTORY + self.cooler_file_name
+        )
+
+        self.assertEqual(self.bigwig_tileset.file_url, self.bigwig_file_url)
+        self.assertEqual(self.bigwig_tileset.file_name, self.bigwig_file_name)
+        self.assertEqual(
+            self.bigwig_tileset.file_path,
+            on_startup.DATA_DIRECTORY + self.bigwig_file_name
         )
 
     def test_tileset_repr(self):
@@ -103,18 +111,45 @@ class StartupScriptTests(unittest.TestCase):
             str(self.cooler_tileset)
         )
 
+        self.assertEqual(
+            "Tileset: {} {} {}".format(
+                self.bigwig_tileset.file_path,
+                self.bigwig_tileset.file_type,
+                self.bigwig_tileset.data_type
+            ),
+            str(self.bigwig_tileset)
+        )
+
     def test_tileset_file_downloaded(self):
-        self.assertTrue(os.path.exists("/tmp/" + self.test_file_name))
+        self.assertTrue(os.path.exists("/tmp/" + self.cooler_file_name))
+        self.assertTrue(os.path.exists("/tmp/" + self.bigwig_file_name))
 
     def test_tileset_ingest(self):
         with mock.patch("on_startup.call_command") as call_command_mock:
             self.cooler_tileset.ingest()
-            self.assertTrue(call_command_mock.called)
+            self.bigwig_tileset.ingest()
+            self.assertEqual(call_command_mock.call_count, 2)
+
+    @mock.patch("django.setup")
+    @mock.patch("on_startup.call_command")
+    @mock.patch("on_startup._start_nginx")
+    def test_module_invocation(
+        self, start_nginx_mock, call_command_mock, django_setup_mock
+    ):
+        os.environ["INPUT_JSON_URL"] = "http://{}:{}/test-data/input.json".format(
+            test_container_runner.test_fixture_server.ip,
+            test_container_runner.test_fixture_server.port
+        )
+        with mock.patch.object(on_startup, "__name__", "__main__"):
+            on_startup.init()
+            self.assertTrue(django_setup_mock.called)
+            self.assertTrue(start_nginx_mock.called)
+            self.assertEqual(call_command_mock.call_count, 5)
 
 if __name__ == '__main__':
     test_container_runner = TestContainerRunner()
     with test_container_runner:
-        suite = unittest.TestLoader().loadTestsFromTestCase(CommandlineTest)
+        suite = unittest.TestLoader().loadTestsFromTestCase(ContainerIntegrationTests)
         suite.addTests(
             unittest.TestLoader().loadTestsFromTestCase(StartupScriptTests)
         )
