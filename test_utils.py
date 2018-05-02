@@ -106,7 +106,13 @@ class TestContainerRunner(object):
                 }
             }
         )
+        self._set_container_port()
         self.containers.append(container)
+        
+    def _set_container_port(self):
+        self.container_port = self.low_level_client.port(
+            self.container_name, 80
+        )[0]["HostPort"]
 
     def docker_cleanup(self):
         print("Cleaning up TestContainerRunner containers/images...", 

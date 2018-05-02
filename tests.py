@@ -19,9 +19,9 @@ logger = logging.getLogger(__name__)
 class ContainerIntegrationTests(unittest.TestCase):
 
     def setUp(self):
-        client = docker.APIClient(base_url='unix://var/run/docker.sock')
-        port = client.port(os.environ["CONTAINER_NAME"], 80)[0]["HostPort"]
-        self.base_url = "http://localhost:{}/".format(port)
+        self.base_url = "http://localhost:{}/".format(
+            test_container_runner.container_port
+        )
         self.tilesets_url = '{}api/v1/tilesets/'.format(self.base_url)
         for i in range(60):  # probably overkill, but Travis is slow sometimes
             try:
