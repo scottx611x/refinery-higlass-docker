@@ -7,20 +7,16 @@
 ### Pre-Reqs:
 - docker
 - git
-- python
+- python 3
 
-### Running the Container:
-- `pip install -r requirements.txt`
-- `./test_runner.sh`
+### Running tests:
+- `pip install -r requirements-test.txt`
+- `python tests.py` or with coverage: `coverage run tests.py`
 
-If the tests pass you'll be provided with some info about the currently running container:
 ```
-Ran 6 tests in 25.254s
+Ran 9 tests in 47.260s
 
 OK
-browse:  http://localhost:32775/
-shell:   docker exec --interactive --tty container-2018-04-11_10-09-07-standalone bash
-logs:    docker exec container-2018-04-11_10-09-07-standalone ./logs.sh
+Cleaning up TestContainerRunner containers...
+[<Container: d6a1e50cbb>]
 ```
-
-

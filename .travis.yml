@@ -1,18 +1,18 @@
-# Docker on Travis requires sudo.
-sudo: required
-
+language: python
+python:
+  - 3.6
 install:
-  - sudo pip install -r requirements.txt
+  - pip install -r requirements-test.txt
 script:
-  - sudo ./test_runner.sh
+  - coverage run tests.py
 
 after_success:
   - codecov
   - REPO=scottx611x/refinery-higlass-docker
-  - IMAGE=`sudo docker ps --latest --format '{{ .Image }}'` # TODO: with more containers, can't rely on ordering
-  - tag_push() { echo "Tagging into $2"; sudo docker tag $1 $2; sudo docker push $2; }
+  - IMAGE=`docker ps --latest --format '{{ .Image }}'` # TODO: with more containers, can't rely on ordering
+  - tag_push() { echo "Tagging into $2"; docker tag $1 $2; docker push $2; }
 
-  - sudo docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
   # Always update "latest": the cache will be used for the next build.
   - tag_push $IMAGE $REPO
   - >
@@ -38,5 +38,5 @@ notifications:
     on_failure: always
 env:
   global:
-  - secure: r3GsMiK82N3X9IC5fE9u1VgU9DfsPQFYFk9gVuA4zYgBk3gBhZPhROqcyS4BRQWP96DhZA/H7uR8i1YlwvrW5FICH/qU95wzCIu1n7A6nmXi0YZQIC3Fy1WrXsuFWb2eG/UA6fyV2976aHI23jopsZMNYNgNCT/W2alieLk0kiHNh7SNsfYzra16Wzx+jQOKExmWtziBPnSckO0p63fDtlBAkAh9v+yB4jZI3D9cULMgT/IQ4v+Z2lVo5wgzzRUUnU2ougG3Lsefm4O0pA7QdNfKEfyv132SiSVcOTudcvmk6pMh/QFfF5/LzIcnN1eh6cppzzEk8+DsduUjjgtl2rXn74BAIOZrjtuJx2Q1pPD+KBv0pp51wMceyuX1ossDuamvokokP1somtnH8uaIPG4aBT3SpdTrO1yIo+gaWFykZS9ctM04gai1KBwc+qBq8WjE3yK6k+PdKb9xyIK8riCK4rgGMefDMIF7ebTcEGIQM+Wl+48PvINoh7t796F+81sT0Zph3jVMOXkOttceUWLZTDnhN5sisD0AVvD4SvM6fHfytH0jmH0cRyTuLxRNj4fPERO9e1PVA7o3AvfGs+bB8KlVNtz8YuPKhNRz9TJApasIM36MilvE2GPF71LWLleHavuGJwHPAhJsM8UMlvHijFK6WtdmSVmApZ8cwyY=
-  - secure: YxS3uqyGNAnacaM6cnvk5fcvm//kFPwdibsRDy1FOxKYzuujU16UmkD+8osRPZTbajOWkUPyoLeNAwuKpBemm+DgCdXps7so/OHj7AkiV6zAP+5W3trlAPdbCApOnu6J5abBsaC7OZOIR+3V8swNbeE9I+YgpvmiRFRDnrqIvmqxzUti0UhmNzADMBWnllQ0FV5GeKYJ4kiyGKwIr9FSWPn4mH/HX2QKagcNbyWu4mBqdiQMucqbwRpIkPquoCakORecWNqrrjXWn0q8Owbaq0cYJMdN7TlUanqQzbxg4db1kIiyD1XNFQLjWWj5538VjKP0TQ8nf0X45KkNw6hExrPSeOtwcvBnVlwr9VzV7OZuZomQ43KGtnZENhfAEj2kk0T4w1Drq3DZmQ6p4YpWehfR1s44lXPuIyggpjGk88RbobQ4aHTNC+5na+nf3NqyIJYIbZ42R1nHI6YsIX/N72csmixeTvgrcBy60HbiGoZN4rmdPqDItE5vjUF9uUcwBCBHjGNchA/RzwZ7g/tSgMFVA0dr2a+DnLQk9jukFdkagmZmiMQn0BEq5b68Gi5sd4jCmJFRE23FCY6TReCie+XYQcHbuIGQFpREPIbkop0moLdd6PWankV6ge/LcUhWSkd1iZQHsWLUl7BD67wF0zcEoNONIOGOdCmVYRRakHg=
+    - secure: "FLA1YpZuuyY5/2c70HYY9VZlOiKInd5c3ZdJS6I5h7wZgDVcRhs3/DbGeH4189irhPPixyQXXq7omHh4nm4x4ud0xB3HMlAEjeiA3UZI5T22qZs3lwtpoQcMybituZNJAGJ85VxctIC+3Tl7M6PduTVOMV4huAnfoQQucq1+IzWi9Rb1V51Rxvb2wysPApPLFGkgqgyOvGbmAmOBcf3rqsedzFsa0ZHpSi+SfshY2G3kIl7Miqj1ufLEU8Uiom+FhihUq2Pp+SXJlbYpbsjyZeSKZ5VRIKWfaV8TRjPYP1Has24uWgJANECrU/oQGPx+2WZBl8QjXnLeMrtjFFklPDVENMDCX3Cpz5qWX/hmi0AGZoo1nY9fpsLX9hi/I1Tob3mhwaN+G7Amr/XDvCH0qZWVcohvNof7Rt3Z+tgqbiuAm/ongOESzbskrkATs1LIm/030/eriP4VD/q4WgMLntMj1i2T7obpLxa4Soam7o/YgR6suAvCj2BIQlWB0/04/61x5hshIdyPls9mJs/wA5gJN0vGrzosII1G6tJaaJvVtwh+dTOqBWLHOO9gQwchzFad2FvtOupZngxezVa1vrtx5Y9Nx23w1Z42cuaLWmuj+fNVgKeS7Tp6by5CTaCmZ7iK+UU/rKjmDfaklZP7o9UYjPd0BU+2YGrOzedofs0="
+    - secure: "djVdj/7zZDPN/3Ma5+DM+2SxhXzsP29Sa47wj3/apzNYdxEqffrJOBFr4phJ4ykmp3lVc93Yu0YJ5s0ZCo0mvZ1hpL37LhwfTeeCbbcvSCYkrJB0jhz7pC2hcezXxSKy0OBGT0FpxK0p/lfc6EKR1ZdADPnbyyUmLdbXWeA0mjgDFHMlh4k/uixZhrStvXCbZOFKaM215vNJUYQ8PXxFJFwfXfErLl0WYpHTlbhRxBUjhHDp4hLmhv9Ra096lxRCgwdwj4QtUpl0hZXLlX4ZfNLqK8w8MDr7ZUFm7ttfMi1hWx8RSsD+MWXW3ouxvOThjIaz+1sKne7McPdlP8Av0GOh/WA5b0XzJvILRij0ftcxp58ZTZjfkkXhHA6SYCaZR3kOULXSKdsSbLpOQtxDidHyRacLx622hCJmw1R57Kf19WMc6IBnSEF3salupDJlg0FSCrUpbQc7kD47b7JhQI6VQ1LxxcbEtsb5yEOvs7QTbWkngfdgrfDM6mlFCayGp5NDsvyzHTX70BLD2Q3YK7ycG/2DE+Teh0MGI7iA20CRg+53f5GO7IRo93nCzCd39IWZIdyj0Ro4Em+ZoAxPYLQU+zVBDySRPIaVTLb0VlaXcsFOGDsDlSQbg8Kloe9fJdepePuqooDcgAMmUTEzZZ81f5SoaGXeeZC+sBUg7mo="
