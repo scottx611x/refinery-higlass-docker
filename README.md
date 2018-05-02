@@ -7,11 +7,11 @@
 ### Pre-Reqs:
 - docker
 - git
-- python
+- python 3
 
 ### Running tests:
-- `pip install -r requirements.txt`
-- `./test_runner.sh`
+- `pip install -r requirements-test.txt`
+- `python tests.py` or with coverage: `coverage run tests.py`
 
 ```
 Ran 9 tests in 47.260s
