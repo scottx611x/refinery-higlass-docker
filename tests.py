@@ -1,5 +1,4 @@
 import json
-import logging
 import mock
 import os
 import requests
@@ -12,8 +11,6 @@ import docker
 import on_startup
 
 from test_utils import TestContainerRunner
-
-logger = logging.getLogger(__name__)
 
 
 class ContainerIntegrationTests(unittest.TestCase):
