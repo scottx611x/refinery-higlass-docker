@@ -56,6 +56,7 @@ class ContainerIntegrationTests(unittest.TestCase):
 class StartupScriptTests(unittest.TestCase):
 
     def setUp(self):
+        self.tilesets = []
         mock.patch.object(on_startup, "DATA_DIRECTORY", "/tmp/").start()
 
         with open("test-data/input.json") as f:
@@ -63,66 +64,46 @@ class StartupScriptTests(unittest.TestCase):
             self.cooler_file_url = input_dict["file_relationships"][0]
             self.bigwig_file_url = input_dict["file_relationships"][3]
 
-        self.cooler_file_name = self.cooler_file_url.split("/")[-1]
-        self.bigwig_file_name = self.bigwig_file_url.split("/")[-1]
-
-        refinery_cooler_node = {"file_url": self.cooler_file_url}
-        refinery_bigwig_node = {"file_url": self.bigwig_file_url}
-
-        self.cooler_tileset = on_startup.Tileset(refinery_cooler_node)
-        self.bigwig_tileset = on_startup.Tileset(refinery_bigwig_node)
+        self.cooler_tileset = self._create_tileset(self.cooler_file_url)
+        self.bigwig_tileset = self._create_tileset(self.bigwig_file_url)
 
     def tearDown(self):
         mock.patch.stopall()
 
-    def test_tileset_type_meta_info_is_set(self):
-        self.assertEqual(self.cooler_tileset.file_type, "cooler")
-        self.assertEqual(self.cooler_tileset.data_type, "matrix")
+    def _create_tileset(self, tileset_url):
+        tileset = on_startup.Tileset({"file_url": tileset_url})
+        self.tilesets.append(tileset)
+        return tileset
 
+    def test_tileset_filetype_is_set(self):
+        self.assertEqual(self.cooler_tileset.file_type, "cooler")
         self.assertEqual(self.bigwig_tileset.file_type, "bigwig")
+
+    def test_tileset_datatype_is_set(self):
+        self.assertEqual(self.cooler_tileset.data_type, "matrix")
         self.assertEqual(self.bigwig_tileset.data_type, "vector")
 
     def test_tileset_is_bigwig(self):
         self.assertFalse(self.cooler_tileset.is_bigwig())
         self.assertTrue(self.bigwig_tileset.is_bigwig())
 
-    def test_tileset_instantiation(self):
-        self.assertEqual(self.cooler_tileset.file_url, self.cooler_file_url)
-        self.assertEqual(self.cooler_tileset.file_name, self.cooler_file_name)
+    def _tileset_repr_assertions(self, tileset):
         self.assertEqual(
-            self.cooler_tileset.file_path,
-            on_startup.DATA_DIRECTORY + self.cooler_file_name
-        )
-
-        self.assertEqual(self.bigwig_tileset.file_url, self.bigwig_file_url)
-        self.assertEqual(self.bigwig_tileset.file_name, self.bigwig_file_name)
-        self.assertEqual(
-            self.bigwig_tileset.file_path,
-            on_startup.DATA_DIRECTORY + self.bigwig_file_name
+            "Tileset: {} {} {}".format(
+                tileset.file_path,
+                tileset.file_type,
+                tileset.data_type
+            ),
+            str(tileset)
         )
 
     def test_tileset_repr(self):
-        self.assertEqual(
-            "Tileset: {} {} {}".format(
-                self.cooler_tileset.file_path,
-                self.cooler_tileset.file_type,
-                self.cooler_tileset.data_type
-            ),
-            str(self.cooler_tileset)
-        )
-
-        self.assertEqual(
-            "Tileset: {} {} {}".format(
-                self.bigwig_tileset.file_path,
-                self.bigwig_tileset.file_type,
-                self.bigwig_tileset.data_type
-            ),
-            str(self.bigwig_tileset)
-        )
+        for tileset in self.tilesets:
+            self._tileset_repr_assertions(tileset)
 
     def test_tileset_file_downloaded(self):
-        self.assertTrue(os.path.exists("/tmp/" + self.cooler_file_name))
-        self.assertTrue(os.path.exists("/tmp/" + self.bigwig_file_name))
+        for tileset in self.tilesets:
+            self.assertTrue(os.path.exists("/tmp/" + tileset.file_name))
 
     def test_tileset_ingest(self):
         with mock.patch("on_startup.call_command") as call_command_mock:
@@ -148,11 +129,4 @@ class StartupScriptTests(unittest.TestCase):
 if __name__ == '__main__':
     test_container_runner = TestContainerRunner()
     with test_container_runner:
-        suite = unittest.TestLoader().loadTestsFromTestCase(ContainerIntegrationTests)
-        suite.addTests(
-            unittest.TestLoader().loadTestsFromTestCase(StartupScriptTests)
-        )
-        result = unittest.TextTestRunner(verbosity=2).run(suite)
-
-    if not result.wasSuccessful():
-        sys.exit(1)
+        unittest.main()
