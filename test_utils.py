@@ -65,7 +65,7 @@ class TestContainerRunner(object):
         self.client.images.pull(self.repository)
 
     def _build_image(self):
-        print("Building image: {}".format(self.image_name))
+        print("Building image: {}".format(self.image_name), file=sys.stdout)
         self.client.images.build(
             path=".",
             tag=self.image_name,
