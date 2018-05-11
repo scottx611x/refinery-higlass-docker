@@ -108,18 +108,14 @@ class StartupScriptTests(unittest.TestCase):
             self.bigwig_tileset.ingest()
             self.assertEqual(call_command_mock.call_count, 2)
 
-    @mock.patch("django.setup")
     @mock.patch("on_startup.call_command")
     @mock.patch("on_startup._start_nginx")
-    def test_module_invocation(
-        self, start_nginx_mock, call_command_mock, django_setup_mock
-    ):
+    def test_module_invocation(self, start_nginx_mock, call_command_mock):
         os.environ["INPUT_JSON_URL"] = "http://{}:{}/test-data/input.json".format(
             test_container_runner.test_fixture_server.ip,
             test_container_runner.test_fixture_server.port
         )
         on_startup.main()
-        self.assertTrue(django_setup_mock.called)
         self.assertTrue(start_nginx_mock.called)
         self.assertEqual(call_command_mock.call_count, 5)
 
