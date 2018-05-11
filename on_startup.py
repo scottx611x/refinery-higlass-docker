@@ -132,40 +132,43 @@ def main():
     the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
     Tileset objects
     """
-    django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
+    try:
+        django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
 
-    config_data = get_refinery_input()
+        config_data = get_refinery_input()
 
-    for refinery_node_uuid in config_data[NODE_INFO]:
-        refinery_node = config_data[NODE_INFO][refinery_node_uuid]
-        Tileset(refinery_node).ingest()
+        for refinery_node_uuid in config_data[NODE_INFO]:
+            refinery_node = config_data[NODE_INFO][refinery_node_uuid]
+            Tileset(refinery_node).ingest()
 
-    _start_nginx()  # Start Nginx after all tilesets have been ingested
+        _start_nginx()  # Start Nginx after all tilesets have been ingested
+    except Exception as e:
+        error_page(e)
+
+def error_page(e):
+    error_str = ''.join(
+        traceback.TracebackException.from_exception(e).format()
+    )
+    warn(error_str)
+
+    html = '''
+                <html><head><title>Error</title></head><body>
+                <p>An error has occurred: There may be a problem with the
+                input provided. To report a bug, please copy this page and
+                paste it in a <a href="{url}">bug report</a>. Thanks!</p>
+                <pre>{stack}</pre>
+                </body></html>'''.format(
+        url='https://github.com/refinery-platform/'
+            'refinery-higlass-docker/issues/new',
+        stack=html.escape(error_str))
+
+    os.chdir(mkdtemp())
+    open('index.html', 'w').write(html)
+
+    httpd = HTTPServer(('', 80), SimpleHTTPRequestHandler)
+    httpd.serve_forever()
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        error_str = ''.join(
-            traceback.TracebackException.from_exception(e).format()
-        )
-        warn(error_str)
-
-        html = '''
-            <html><head><title>Error</title></head><body>
-            <p>An error has occurred: There may be a problem with the
-            input provided. To report a bug, please copy this page and
-            paste it in a <a href="{url}">bug report</a>. Thanks!</p>
-            <pre>{stack}</pre>
-            </body></html>'''.format(
-            url='https://github.com/refinery-platform/'
-                'refinery-higlass-docker/issues/new',
-            stack=html.escape(error_str))
-
-        os.chdir(mkdtemp())
-        open('index.html', 'w').write(html)
-
-        httpd = HTTPServer(('', 80), SimpleHTTPRequestHandler)
-        httpd.serve_forever()
+    main()
 

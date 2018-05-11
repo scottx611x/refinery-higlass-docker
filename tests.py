@@ -123,6 +123,11 @@ class StartupScriptTests(unittest.TestCase):
         self.assertTrue(start_nginx_mock.called)
         self.assertEqual(call_command_mock.call_count, 5)
 
+    @mock.patch('on_startup.error_page')
+    def test_error_handling(self, error_page_mock):
+        on_startup.main()
+        self.assertTrue(error_page_mock.called)
+
 if __name__ == '__main__':
     test_container_runner = TestContainerRunner()
     with test_container_runner:
