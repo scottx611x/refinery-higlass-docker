@@ -1,7 +1,12 @@
+import html
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import json
 import os
 import requests
 import subprocess
-import sys
+from tempfile import mkdtemp
+import traceback
+from warnings import warn
 
 import django
 import pyBigWig
@@ -103,8 +108,12 @@ class Tileset(object):
 
 
 def get_refinery_input():
-    """ Make a GET request to acquire the input data for the container"""
-    return requests.get(os.environ["INPUT_JSON_URL"]).json()
+    """Read envvars and get input data for the container"""
+    if 'INPUT_JSON' in os.environ:
+        return json.loads(os.environ["INPUT_JSON"])
+    elif 'INPUT_JSON_URL' in os.environ:
+        return requests.get(os.environ["INPUT_JSON_URL"]).json()
+    raise Exception('Did not find expected environment variable')
 
 
 def _start_nginx():
@@ -135,5 +144,28 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        error_str = ''.join(
+            traceback.TracebackException.from_exception(e).format()
+        )
+        warn(error_str)
+
+        html = '''
+            <html><head><title>Error</title></head><body>
+            <p>An error has occurred: There may be a problem with the
+            input provided. To report a bug, please copy this page and
+            paste it in a <a href="{url}">bug report</a>. Thanks!</p>
+            <pre>{stack}</pre>
+            </body></html>'''.format(
+            url='https://github.com/refinery-platform/'
+                'refinery-higlass-docker/issues/new',
+            stack=html.escape(error_str))
+
+        os.chdir(mkdtemp())
+        open('index.html', 'w').write(html)
+
+        httpd = HTTPServer(('', 80), SimpleHTTPRequestHandler)
+        httpd.serve_forever()
 
