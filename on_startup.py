@@ -133,8 +133,6 @@ def main():
     Tileset objects
     """
     try:
-        django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
-
         config_data = get_refinery_input()
 
         for refinery_node_uuid in config_data[NODE_INFO]:
@@ -170,5 +168,7 @@ def error_page(e):
 
 
 if __name__ == '__main__':
+    django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
+    # TODO: On travis, we're getting a migration error from this.
     main()
 
