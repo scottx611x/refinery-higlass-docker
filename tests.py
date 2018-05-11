@@ -109,13 +109,15 @@ class StartupScriptTests(unittest.TestCase):
             self.assertEqual(call_command_mock.call_count, 2)
 
     @mock.patch("on_startup.call_command")
+    @mock.patch("on_startup._fetch_default_viewconf")
     @mock.patch("on_startup._start_nginx")
-    def test_module_invocation(self, start_nginx_mock, call_command_mock):
+    def test_module_invocation(self, start_nginx_mock, fetch_default_viewconf_mock, call_command_mock):
         os.environ["INPUT_JSON_URL"] = "http://{}:{}/test-data/input.json".format(
             test_container_runner.test_fixture_server.ip,
             test_container_runner.test_fixture_server.port
         )
         on_startup.main()
+        self.assertTrue(fetch_default_viewconf_mock.called)
         self.assertTrue(start_nginx_mock.called)
         self.assertEqual(call_command_mock.call_count, 5)
 
