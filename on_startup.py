@@ -1,7 +1,12 @@
+import html
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import json
 import os
 import requests
 import subprocess
-import sys
+from tempfile import mkdtemp
+import traceback
+from warnings import warn
 
 import django
 import pyBigWig
@@ -103,8 +108,12 @@ class Tileset(object):
 
 
 def get_refinery_input():
-    """ Make a GET request to acquire the input data for the container"""
-    return requests.get(os.environ["INPUT_JSON_URL"]).json()
+    """Read envvars and get input data for the container"""
+    if 'INPUT_JSON' in os.environ:
+        return json.loads(os.environ["INPUT_JSON"])
+    elif 'INPUT_JSON_URL' in os.environ:
+        return requests.get(os.environ["INPUT_JSON_URL"]).json()
+    raise Exception('Did not find expected environment variable')
 
 
 def _start_nginx():
@@ -123,17 +132,43 @@ def main():
     the provided INPUT_JSON_URL then ingest the downloaded files into Higlass
     Tileset objects
     """
-    django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
+    try:
+        config_data = get_refinery_input()
 
-    config_data = get_refinery_input()
+        for refinery_node_uuid in config_data[NODE_INFO]:
+            refinery_node = config_data[NODE_INFO][refinery_node_uuid]
+            Tileset(refinery_node).ingest()
 
-    for refinery_node_uuid in config_data[NODE_INFO]:
-        refinery_node = config_data[NODE_INFO][refinery_node_uuid]
-        Tileset(refinery_node).ingest()
+        _start_nginx()  # Start Nginx after all tilesets have been ingested
+    except Exception as e:
+        error_page(e)
 
-    _start_nginx()  # Start Nginx after all tilesets have been ingested
+def error_page(e):
+    error_str = ''.join(
+        traceback.TracebackException.from_exception(e).format()
+    )
+    warn(error_str)
+
+    html = '''
+                <html><head><title>Error</title></head><body>
+                <p>An error has occurred: There may be a problem with the
+                input provided. To report a bug, please copy this page and
+                paste it in a <a href="{url}">bug report</a>. Thanks!</p>
+                <pre>{stack}</pre>
+                </body></html>'''.format(
+        url='https://github.com/refinery-platform/'
+            'refinery-higlass-docker/issues/new',
+        stack=html.escape(error_str))
+
+    os.chdir(mkdtemp())
+    open('index.html', 'w').write(html)
+
+    httpd = HTTPServer(('', 80), SimpleHTTPRequestHandler)
+    httpd.serve_forever()
 
 
 if __name__ == '__main__':
+    django.setup()  # Allow django commands to be run (Ex: `ingest_tileset`)
+    # TODO: On travis, we're getting a migration error from this.
     main()
 
