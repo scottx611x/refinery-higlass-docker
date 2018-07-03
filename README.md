@@ -21,3 +21,4 @@ Cleaning up TestContainerRunner containers...
 ### Releases:
 - `git tag -a vX.X.X && git push --tags`
 - A new docker image will be built and tagged with the corresponding tag
+ 
