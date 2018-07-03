@@ -71,8 +71,9 @@ class TestContainerRunner(object):
             shutil.rmtree(self.outer_volume_path)
 
     def _pull_image(self):
-        print("Pulling image: {}".format(self.image_name))
-        self.client.images.pull(self.repository)
+        latest_image = self.repository + ":latest"
+        print("Pulling image: {}".format(latest_image))
+        self.client.images.pull(latest_image)
 
     def _build_image(self):
         print("Building image: {}".format(self.image_name))
