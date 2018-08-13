@@ -167,7 +167,7 @@ def error_page(e):
     )
     warn(error_str)
 
-    html = '''
+    error_html = '''
                 <html><head><title>Error</title></head><body>
                 <p>An error has occurred: There may be a problem with the
                 input provided. To report a bug, please copy this page and
@@ -179,7 +179,7 @@ def error_page(e):
         stack=html.escape(error_str))
 
     os.chdir(mkdtemp())
-    open('index.html', 'w').write(html)
+    open('index.html', 'w').write(error_html)
 
     httpd = HTTPServer(('', 80), SimpleHTTPRequestHandler)
     httpd.serve_forever()
