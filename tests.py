@@ -1,15 +1,13 @@
 import json
-import mock
 import os
-import requests
 import subprocess
-import sys
 import time
 import unittest
 
-import docker
-import on_startup
+import mock
+import requests
 
+from context import on_startup
 from test_utils import TestContainerRunner
 
 

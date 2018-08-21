@@ -78,7 +78,7 @@ class TestContainerRunner(object):
     def _build_image(self):
         print("Building image: {}".format(self.image_name))
         self.client.images.build(
-            path=".",
+            path="context",
             tag=self.image_name,
             rm=True,
             forcerm=True,
