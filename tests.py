@@ -1,15 +1,13 @@
 import json
-import mock
 import os
-import requests
 import subprocess
-import sys
 import time
 import unittest
 
-import docker
-import on_startup
+import mock
+import requests
 
+from context import on_startup
 from test_utils import TestContainerRunner
 
 
@@ -103,14 +101,14 @@ class StartupScriptTests(unittest.TestCase):
             self.assertTrue(os.path.exists("/tmp/" + tileset.file_name))
 
     def test_tileset_ingest(self):
-        with mock.patch("on_startup.call_command") as call_command_mock:
+        with mock.patch("context.on_startup.call_command") as call_command_mock:
             self.cooler_tileset.ingest()
             self.bigwig_tileset.ingest()
             self.assertEqual(call_command_mock.call_count, 2)
 
-    @mock.patch("on_startup.call_command")
-    @mock.patch("on_startup._fetch_default_viewconf")
-    @mock.patch("on_startup._start_nginx")
+    @mock.patch("context.on_startup.call_command")
+    @mock.patch("context.on_startup._fetch_default_viewconf")
+    @mock.patch("context.on_startup._start_nginx")
     def test_module_invocation(self, start_nginx_mock, fetch_default_viewconf_mock, call_command_mock):
         os.environ["INPUT_JSON_URL"] = "http://{}:{}/test-data/input.json".format(
             test_container_runner.test_fixture_server.ip,
@@ -121,7 +119,7 @@ class StartupScriptTests(unittest.TestCase):
         self.assertTrue(start_nginx_mock.called)
         self.assertEqual(call_command_mock.call_count, 5)
 
-    @mock.patch('on_startup.error_page')
+    @mock.patch('context.on_startup.error_page')
     def test_error_handling(self, error_page_mock):
         on_startup.main()
         self.assertTrue(error_page_mock.called)
