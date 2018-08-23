@@ -116,7 +116,7 @@ def get_refinery_input():
     raise Exception('Did not find expected environment variable')
 
 
-def _fetch_default_viewconf():
+def _wait_for_viewconf():
     """
     Wait until the default viewconf is available.
     See: https://github.com/refinery-platform/refinery-higlass-docker/issues/13
@@ -149,13 +149,12 @@ def main():
     Tileset objects
     """
     try:
-        config_data = get_refinery_input()
+        _wait_for_viewconf()
 
-        for refinery_node_uuid in config_data[NODE_INFO]:
-            refinery_node = config_data[NODE_INFO][refinery_node_uuid]
+        config_data = get_refinery_input()
+        for refinery_node in config_data[NODE_INFO].values():
             Tileset(refinery_node).ingest()
 
-        _fetch_default_viewconf()
         _start_nginx()  # Start Nginx after all tilesets have been ingested
     except Exception as e:
         error_page(e)

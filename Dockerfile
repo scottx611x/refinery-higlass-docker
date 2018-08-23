@@ -1,10 +1,14 @@
 FROM gehlenborglab/higlass:v0.4.18
+# TODO: .25
 
 # Swap the "app" html with the main html to always provide the /app/ view
 RUN cp /home/higlass/projects/higlass-website/app/index.html /home/higlass/projects/higlass-website/index.html
 
 # Don't start nginx automatically. We'll start it manually after tilesets have been ingested
 RUN sed -i '/\[program\:nginx\]/a autostart \= false' supervisord.conf
+
+# After everything else completes, run our on_startup.py
+RUN perl -i -pne 's|command = bash -c "[^"]+|$&; python /home/higlass/projects/higlass-server/on_startup.py|' supervisord.conf
 
 # We want higlass launcher to access the default viewconf relative to our current location
 RUN sed -i 's@"#higlass","\/api@"#higlass","\.\/api@g' \
@@ -29,13 +33,3 @@ RUN touch higlass-website/assets/images/favicon.png
 COPY on_startup.py /home/higlass/projects/higlass-server
 COPY refinery-settings.py /home/higlass/projects/higlass-server/higlass_server
 ENV DJANGO_SETTINGS_MODULE="higlass_server.refinery-settings"
-
-# Append to the supervisord.conf and set the priority of `on_startup.py` to
-# be greater than the default of `999` so that it starts up after uwsgi processes. 
-# Running the `ingest_tileset` Django management command requires things like db migrations to have been applied, 
-# which the uwsgi stuff handles.
-RUN ( echo; \
-      echo "[program:on_startup]"; \
-      echo "command = python /home/higlass/projects/higlass-server/on_startup.py"; \
-      echo "priority = 1000"; ) \
-    >> supervisord.conf
